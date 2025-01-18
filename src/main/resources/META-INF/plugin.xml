@@ -19,6 +19,8 @@
                                  implementationClass="it.casaricci.hass.intellij.findUsages.HassScriptFindUsagesProvider"
                                  order="before yamlFindUsagesProvider"/>
         <lookup.charFilter implementation="it.casaricci.hass.intellij.completion.HassCharFilter"/>
+        <!-- TODO not ready yet platform.backend.documentation.psiTargetProvider
+                implementation="it.casaricci.hass.intellij.documentation.HassDocumentationProvider"/-->
     </extensions>
 
     <extensions defaultExtensionNs="JavaScript.JsonSchema">
