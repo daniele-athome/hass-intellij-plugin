@@ -1,0 +1,3 @@
+[submodule "third-party/MaterialDesignIcons"]
+	path = third-party/MaterialDesignIcons
+	url = https://github.com/Templarian/MaterialDesign.git

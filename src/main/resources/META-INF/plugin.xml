@@ -1,0 +1,36 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>it.casaricci.hass.intellij</id>
+    <name>Home Assistant</name>
+    <vendor>Daniele Ricci</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.json</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
+
+    <resource-bundle>messages.MyBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <psi.referenceContributor language="yaml"
+                                  implementation="it.casaricci.hass.intellij.psi.HassReferenceContributor"/>
+        <completion.contributor language="yaml"
+                                implementationClass="it.casaricci.hass.intellij.completion.HassCompletionContributor"/>
+        <lang.findUsagesProvider language="yaml"
+                                 implementationClass="it.casaricci.hass.intellij.findUsages.HassScriptFindUsagesProvider"
+                                 order="before yamlFindUsagesProvider"/>
+        <lookup.charFilter implementation="it.casaricci.hass.intellij.completion.HassCharFilter"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="JavaScript.JsonSchema">
+        <ProviderFactory implementation="it.casaricci.hass.intellij.schema.HassJsonSchemaProviderFactory"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <facetType implementation="it.casaricci.hass.intellij.facet.HassFacetType"/>
+    </extensions>
+
+    <projectListeners>
+        <listener class="it.casaricci.hass.intellij.listener.HassModuleListener"
+                  topic="com.intellij.openapi.project.ModuleListener"/>
+    </projectListeners>
+</idea-plugin>
