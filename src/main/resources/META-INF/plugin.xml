@@ -21,6 +21,14 @@
         <lookup.charFilter implementation="it.casaricci.hass.plugin.completion.HassCharFilter"/>
         <!-- TODO not ready yet platform.backend.documentation.psiTargetProvider
                 implementation="it.casaricci.hass.plugin.documentation.HassDocumentationProvider"/-->
+
+        <projectConfigurable
+                parentId="tools"
+                provider="it.casaricci.hass.plugin.settings.ProjectSettingsConfigurableProvider"
+                id="it.casaricci.hass.plugin.settings.ProjectSettingsConfigurableProvider"
+                key="hass.facet.name"
+                bundle="messages.MyBundle"
+                nonDefaultProject="true"/>
     </extensions>
 
     <extensions defaultExtensionNs="JavaScript.JsonSchema">

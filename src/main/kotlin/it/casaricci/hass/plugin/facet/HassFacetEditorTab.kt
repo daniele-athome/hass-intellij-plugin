@@ -16,7 +16,7 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-
+// TODO use HassFacetSettingsComponent
 class HassFacetEditorTab(
     private val state: HassFacetState,
     private val context: FacetEditorContext,
