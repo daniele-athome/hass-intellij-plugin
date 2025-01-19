@@ -88,16 +88,22 @@ private data class StateObject(
     val attributes: StateAttributesObject
 )
 
+private val SERVICES_CACHE = Key<CachedValue<Collection<JsonProperty>>>("HASS_SERVICES")
+
+private val STATES_CACHES = mutableMapOf<String, Key<CachedValue<Collection<JsonStringLiteral>>>>()
+
+private fun getStatesCacheKey(vararg domainName: String): Key<CachedValue<Collection<JsonStringLiteral>>> {
+    val key = domainName.joinToString("_")
+    return STATES_CACHES.getOrPut(key) {
+        Key<CachedValue<Collection<JsonStringLiteral>>>("HASS_${key}_CACHE")
+    }
+}
+
 /**
  * Service used for caching data from Home Assistant instance (services, entities, etc.).
  */
 @Service(Service.Level.PROJECT)
 class HassRemoteRepository(private val project: Project, private val cs: CoroutineScope) {
-
-    companion object {
-        private val STATES_CACHE = Key<CachedValue<List<JsonStringLiteral>>>("HASS_STATES")
-        private val SERVICES_CACHE = Key<CachedValue<Collection<JsonProperty>>>("HASS_SERVICES")
-    }
 
     @OptIn(ExperimentalSerializationApi::class)
     private val jsonFormatter = Json {
@@ -197,10 +203,9 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
     }
 
     fun getStates(module: Module, vararg excludeDomains: String): Collection<JsonStringLiteral>? {
-        // TODO cache key depending on excludeDomains
         return CachedValuesManager.getManager(project).getCachedValue(
             module,
-            STATES_CACHE,
+            getStatesCacheKey(*excludeDomains),
             {
                 val result: List<JsonStringLiteral>? = if (isStatesCacheAvailable(module)) {
                     ReadAction.compute<List<JsonStringLiteral>, Throwable> {

@@ -20,6 +20,7 @@ Support for [Home Assistant](https://www.home-assistant.io/) configuration files
 * Find usages of any script
 * Access remote Home Assistant data about available services (actions) and entities and use it to resolve any other reference
 * Action call completion
+* Entity completion
 * Secret completion
 * Go to secret value
 * Dedicated module facet, supporting multiple Home Assistant configurations in the same project

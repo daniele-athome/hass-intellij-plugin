@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.Key
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.search.FilenameIndex
@@ -23,6 +24,7 @@ private const val SECRETS_FILENAME = "secrets.yaml"
 
 private val AUTOMATIONS_CACHE = Key<CachedValue<Collection<YAMLKeyValue>>>("HASS_AUTOMATIONS_CACHE")
 private val ACTIONS_CACHE = Key<CachedValue<Collection<PsiNamedElement>>>("HASS_ACTIONS_CACHE")
+private val ENTITIES_CACHE = Key<CachedValue<Collection<PsiElement>>>("HASS_ENTITIES_CACHE")
 private val SECRETS_CACHE = Key<CachedValue<Collection<YAMLKeyValue>>>("HASS_SECRETS_CACHE")
 
 private val DOMAIN_CACHES = mutableMapOf<String, Key<CachedValue<Collection<YAMLKeyValue>>>>()
@@ -50,6 +52,35 @@ class HassDataRepository(private val project: Project) {
             {
                 CachedValueProvider.Result.create(
                     getSecondLevelElementsByKeyName(module, domainName),
+                    PsiModificationTracker.MODIFICATION_COUNT
+                )
+            },
+            false
+        )
+    }
+
+    // TODO surely there is a more efficient way for merging local entities with remote entities
+    fun getEntities(module: Module): Collection<PsiElement> {
+        return CachedValuesManager.getManager(project).getCachedValue(
+            module,
+            ENTITIES_CACHE,
+            {
+                val remoteService = module.project.getService(HassRemoteRepository::class.java)
+
+                // TODO we should use local definitions for domains we can handle (groups, input_*, etc.)
+                val localEntities = this.getKeyNameDomainElements(module, HASS_KEY_SCRIPT)
+                // list of all entity id (to filter out duplicates from remote entities)
+                val allEntityIds = localEntities.map { it.keyText }.toHashSet()
+
+                val remoteEntities =
+                    remoteService.getStates(module, HASS_KEY_SCRIPT)?.filter { action ->
+                        !allEntityIds.contains(action.name)
+                    }
+
+                val allEntities = if (remoteEntities != null) (localEntities + remoteEntities) else localEntities
+
+                CachedValueProvider.Result.create(
+                    allEntities,
                     PsiModificationTracker.MODIFICATION_COUNT
                 )
             },
