@@ -20,7 +20,7 @@ import com.intellij.util.Url
 import com.intellij.util.Urls
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.createDirectories
-import it.casaricci.hass.intellij.facet.getFacetState
+import it.casaricci.hass.intellij.getConfiguration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -253,7 +253,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
         cs.launch {
             lock.write {
                 // TODO error handling
-                val config = getFacetState(module) ?: return@launch
+                val config = getConfiguration(module) ?: return@launch
                 val url = buildServicesUrl(config.instanceUrl) ?: return@launch
                 val cachedResponseFile = getServicesCacheFile(module)
 
@@ -291,7 +291,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
         cs.launch {
             lock.write {
                 // TODO error handling
-                val config = getFacetState(module) ?: return@launch
+                val config = getConfiguration(module) ?: return@launch
                 val url = buildStatesUrl(config.instanceUrl) ?: return@launch
                 val cachedResponseFile = getStatesCacheFile(module)
 
