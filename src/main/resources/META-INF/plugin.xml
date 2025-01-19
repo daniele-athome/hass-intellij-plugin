@@ -1,6 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>it.casaricci.hass.intellij</id>
+    <id>it.casaricci.hass.plugin</id>
     <name>Home Assistant</name>
     <vendor>Daniele Ricci</vendor>
 
@@ -12,27 +12,27 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <psi.referenceContributor language="yaml"
-                                  implementation="it.casaricci.hass.intellij.psi.HassReferenceContributor"/>
+                                  implementation="it.casaricci.hass.plugin.psi.HassReferenceContributor"/>
         <completion.contributor language="yaml"
-                                implementationClass="it.casaricci.hass.intellij.completion.HassCompletionContributor"/>
+                                implementationClass="it.casaricci.hass.plugin.completion.HassCompletionContributor"/>
         <lang.findUsagesProvider language="yaml"
-                                 implementationClass="it.casaricci.hass.intellij.findUsages.HassScriptFindUsagesProvider"
+                                 implementationClass="it.casaricci.hass.plugin.findUsages.HassScriptFindUsagesProvider"
                                  order="before yamlFindUsagesProvider"/>
-        <lookup.charFilter implementation="it.casaricci.hass.intellij.completion.HassCharFilter"/>
+        <lookup.charFilter implementation="it.casaricci.hass.plugin.completion.HassCharFilter"/>
         <!-- TODO not ready yet platform.backend.documentation.psiTargetProvider
-                implementation="it.casaricci.hass.intellij.documentation.HassDocumentationProvider"/-->
+                implementation="it.casaricci.hass.plugin.documentation.HassDocumentationProvider"/-->
     </extensions>
 
     <extensions defaultExtensionNs="JavaScript.JsonSchema">
-        <ProviderFactory implementation="it.casaricci.hass.intellij.schema.HassJsonSchemaProviderFactory"/>
+        <ProviderFactory implementation="it.casaricci.hass.plugin.schema.HassJsonSchemaProviderFactory"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
-        <facetType implementation="it.casaricci.hass.intellij.facet.HassFacetType"/>
+        <facetType implementation="it.casaricci.hass.plugin.facet.HassFacetType"/>
     </extensions>
 
     <projectListeners>
-        <listener class="it.casaricci.hass.intellij.listener.HassModuleListener"
+        <listener class="it.casaricci.hass.plugin.listener.HassModuleListener"
                   topic="com.intellij.openapi.project.ModuleListener"/>
     </projectListeners>
 </idea-plugin>
