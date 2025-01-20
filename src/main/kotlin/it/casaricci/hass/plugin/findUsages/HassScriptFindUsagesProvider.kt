@@ -3,7 +3,7 @@ package it.casaricci.hass.plugin.findUsages
 import com.intellij.lang.cacheBuilder.WordsScanner
 import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.psi.PsiElement
-import it.casaricci.hass.plugin.HASS_KEY_SCRIPT
+import it.casaricci.hass.plugin.HASS_DOMAIN_SCRIPT
 import it.casaricci.hass.plugin.MyBundle
 import org.jetbrains.yaml.YAMLWordsScanner
 import org.jetbrains.yaml.psi.YAMLKeyValue
@@ -46,5 +46,5 @@ class HassScriptFindUsagesProvider : FindUsagesProvider {
 
     private fun isMyElement(element: PsiElement): Boolean = element is YAMLKeyValue &&
             element.parent.parent is YAMLKeyValue &&
-            (element.parent.parent as YAMLKeyValue).keyText == HASS_KEY_SCRIPT
+            (element.parent.parent as YAMLKeyValue).keyText == HASS_DOMAIN_SCRIPT
 }

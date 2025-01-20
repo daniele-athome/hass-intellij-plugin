@@ -13,7 +13,7 @@ import com.intellij.platform.backend.presentation.TargetPresentation
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import com.intellij.refactoring.suggested.createSmartPointer
-import it.casaricci.hass.plugin.HASS_KEY_SCRIPT
+import it.casaricci.hass.plugin.HASS_DOMAIN_SCRIPT
 import org.jetbrains.yaml.YAMLLanguage
 import org.jetbrains.yaml.psi.YAMLKeyValue
 
@@ -22,7 +22,7 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
     override fun documentationTarget(element: PsiElement, originalElement: PsiElement?): DocumentationTarget? {
         if (element.language == YAMLLanguage.INSTANCE &&
             element.parent.parent is YAMLKeyValue &&
-            (element.parent.parent as YAMLKeyValue).keyText == HASS_KEY_SCRIPT
+            (element.parent.parent as YAMLKeyValue).keyText == HASS_DOMAIN_SCRIPT
         ) {
             return HassDocumentationScriptTarget(element, originalElement)
         }
