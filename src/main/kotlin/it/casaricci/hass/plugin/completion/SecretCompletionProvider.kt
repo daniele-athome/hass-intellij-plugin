@@ -19,7 +19,7 @@ class SecretCompletionProvider : CompletionProvider<CompletionParameters>() {
     ) {
         // no module, no party
         val module = ModuleUtil.findModuleForPsiElement(parameters.position) ?: return
-        val service = module.project.getService(HassDataRepository::class.java)
+        val service = HassDataRepository.getInstance(module.project)
 
         resultSet.addAllElements(service.getSecrets(module).map {
             LookupElementBuilder.create(it)

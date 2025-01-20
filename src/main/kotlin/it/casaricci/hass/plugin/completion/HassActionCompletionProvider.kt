@@ -11,6 +11,7 @@ import com.intellij.util.ProcessingContext
 import it.casaricci.hass.plugin.entityId
 import it.casaricci.hass.plugin.services.HassDataRepository
 import it.casaricci.hass.plugin.services.getDomainNameFromActionName
+import it.casaricci.hass.plugin.services.getDomainNameFromSecondLevelElement
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.yaml.psi.YAMLKeyValue
 
@@ -23,7 +24,7 @@ class HassActionCompletionProvider : CompletionProvider<CompletionParameters>() 
     ) {
         // no module, no party
         val module = ModuleUtil.findModuleForPsiElement(parameters.position) ?: return
-        val service = module.project.getService(HassDataRepository::class.java)
+        val service = HassDataRepository.getInstance(module.project)
 
         // we should maybe cache LookupElement objects, but we don't have a way to purge them when things change
         // FIXME potentially blocking (reads from file system);
@@ -33,7 +34,7 @@ class HassActionCompletionProvider : CompletionProvider<CompletionParameters>() 
                 when (action) {
                     is YAMLKeyValue -> {
                         // local action (i.e. script)
-                        val domainName = getDomainNameFromActionName(action)
+                        val domainName = getDomainNameFromSecondLevelElement(action)
                         domainName?.let {
                             entityId(domainName, action.keyText)
                         }

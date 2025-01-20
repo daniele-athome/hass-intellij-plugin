@@ -9,7 +9,7 @@ import it.casaricci.hass.plugin.services.HassRemoteRepository
 class HassModuleListener(private val project: Project) : ModuleListener {
 
     override fun modulesAdded(project: Project, modules: MutableList<out Module>) {
-        val service = project.getService(HassRemoteRepository::class.java)
+        val service = HassRemoteRepository.getInstance(project)
         modules.forEach { module ->
             val config = getConfiguration(module)
             if (config != null) {

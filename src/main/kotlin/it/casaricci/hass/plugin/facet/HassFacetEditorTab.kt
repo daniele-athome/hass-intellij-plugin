@@ -72,7 +72,7 @@ class HassFacetEditorTab(
             state.token = component.token
 
             // trigger download immediately
-            val service = context.project.getService(HassRemoteRepository::class.java)
+            val service = HassRemoteRepository.getInstance(context.project)
             service.refreshCache(context.module, true)
 
         } catch (e: Exception) {

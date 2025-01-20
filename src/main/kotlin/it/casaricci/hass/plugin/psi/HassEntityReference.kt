@@ -66,7 +66,7 @@ class HassEntityReference(
     }
 
     private fun handleKeyNameDomain(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
-        val service = module.project.getService(HassDataRepository::class.java)
+        val service = HassDataRepository.getInstance(module.project)
         return service.getKeyNameDomainElements(module, domainName).filter {
             it.keyText == entityName
         }
@@ -75,7 +75,7 @@ class HassEntityReference(
     }
 
     private fun handleAutomation(module: Module, entityName: String): Array<ResolveResult> {
-        val service = module.project.getService(HassDataRepository::class.java)
+        val service = HassDataRepository.getInstance(module.project)
         return service.getAutomations(module).filter {
             it.valueText == entityName
         }
@@ -84,7 +84,7 @@ class HassEntityReference(
     }
 
     private fun handleActionCall(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
-        val service = module.project.getService(HassRemoteRepository::class.java)
+        val service = HassRemoteRepository.getInstance(module.project)
 
         val services = service.getServices(module)
         if (services != null) {
@@ -99,7 +99,7 @@ class HassEntityReference(
     }
 
     private fun handleGenericEntity(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
-        val service = module.project.getService(HassRemoteRepository::class.java)
+        val service = HassRemoteRepository.getInstance(module.project)
 
         val states = service.getStates(module, HASS_DOMAIN_SCRIPT, HASS_DOMAIN_AUTOMATION)
         if (states != null) {

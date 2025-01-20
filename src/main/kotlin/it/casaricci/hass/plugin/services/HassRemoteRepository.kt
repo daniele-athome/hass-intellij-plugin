@@ -45,6 +45,22 @@ private val CACHE_PATH = PathManager.getSystemDir().resolve("homeassistant")
 private const val API_SERVICES_PATH = "api/services"
 private const val API_STATES_PATH = "api/states"
 
+/**
+ * Returns the domain name for the given action coming from the JSON returned by /api/services.
+ *
+ * ```json
+ * [
+ *    {
+ *       "domain" : "homeassistant", // returns "homeassistant"
+ *       "services" : {
+ *          "check_config" : {  // given this JsonProperty
+ *             "description" : "Checks the Home Assistant YAML-configuration files for errors. Errors will be shown in the Home Assistant logs.",
+ *          }
+ *       }
+ *    }
+ * ]
+ * ```
+ */
 fun getDomainNameFromActionName(property: JsonProperty): String? {
     val domainName = property.findParentOfType<JsonObject>()
         ?.findParentOfType<JsonObject>()
@@ -56,7 +72,17 @@ fun getDomainNameFromActionName(property: JsonProperty): String? {
     }
 }
 
-fun getDomainNameFromActionName(property: YAMLKeyValue): String? {
+/**
+ * Returns the domain name for the given second level YAML entry (works for e.g. scripts but not automations).
+ *
+ * ```json
+ * script: // returns "script"
+ *   check_config: // given this YAMLKeyValue
+ *     sequence:
+ *       - action: script.another
+ * ```
+ */
+fun getDomainNameFromSecondLevelElement(property: YAMLKeyValue): String? {
     val parentKey = property.parentMapping?.parent
     return if (parentKey is YAMLKeyValue) {
         parentKey.keyText
@@ -369,6 +395,13 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
 
     private fun buildStatesUrl(instanceUrl: String): Url? {
         return Urls.parse(instanceUrl, false)?.resolve(API_STATES_PATH)
+    }
+
+    companion object {
+        @JvmStatic
+        fun getInstance(project: Project): HassRemoteRepository {
+            return project.getService(HassRemoteRepository::class.java)
+        }
     }
 
 }

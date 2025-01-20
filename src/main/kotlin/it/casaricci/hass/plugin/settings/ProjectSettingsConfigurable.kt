@@ -53,7 +53,7 @@ class ProjectSettingsConfigurable(private val project: Project) : Configurable {
         state.token = other.token
 
         // trigger download immediately
-        val service = project.getService(HassRemoteRepository::class.java)
+        val service = HassRemoteRepository.getInstance(project)
         // this mode of operations cannot have multiple modules (e.g. PyCharm)
         service.refreshCache(project.modules.first(), true)
     }

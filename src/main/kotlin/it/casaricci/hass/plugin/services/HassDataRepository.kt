@@ -67,7 +67,7 @@ class HassDataRepository(private val project: Project) {
             module,
             ENTITIES_CACHE,
             {
-                val remoteService = module.project.getService(HassRemoteRepository::class.java)
+                val remoteService = HassRemoteRepository.getInstance(module.project)
 
                 // TODO we should use local definitions for domains we can handle (groups, input_*, etc.)
                 val localEntities = this.getKeyNameDomainElements(module, HASS_DOMAIN_SCRIPT)
@@ -96,7 +96,7 @@ class HassDataRepository(private val project: Project) {
             module,
             ACTIONS_CACHE,
             {
-                val remoteService = module.project.getService(HassRemoteRepository::class.java)
+                val remoteService = HassRemoteRepository.getInstance(module.project)
 
                 val localActions = this.getKeyNameDomainElements(module, HASS_DOMAIN_SCRIPT)
                 // list of all script names (to filter out duplicates from remote services)
@@ -201,6 +201,13 @@ class HassDataRepository(private val project: Project) {
             }
         )
         return FileTypeIndex.getFiles(YAMLFileType.YML, scope)
+    }
+
+    companion object {
+        @JvmStatic
+        fun getInstance(project: Project): HassDataRepository {
+            return project.getService(HassDataRepository::class.java)
+        }
     }
 
 }

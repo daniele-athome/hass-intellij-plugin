@@ -15,7 +15,7 @@ class HassSecretReference(element: PsiElement, range: TextRange?, private val se
         val fileIndex = ProjectRootManager.getInstance(element.project).fileIndex
         val module = fileIndex.getModuleForFile(element.containingFile.virtualFile)
         if (module != null) {
-            val service = module.project.getService(HassDataRepository::class.java)
+            val service = HassDataRepository.getInstance(module.project)
             return service.getSecrets(module).filter {
                 it.keyText == secretName
             }
