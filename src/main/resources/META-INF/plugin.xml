@@ -29,6 +29,10 @@
                 key="hass.facet.name"
                 bundle="messages.MyBundle"
                 nonDefaultProject="true"/>
+
+        <notificationGroup id="Home Assistant data refresh"
+                           displayType="BALLOON"
+                           key="hass.notification.refreshCache.title"/>
     </extensions>
 
     <extensions defaultExtensionNs="JavaScript.JsonSchema">

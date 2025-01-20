@@ -1,6 +1,8 @@
 package it.casaricci.hass.plugin.services
 
 import com.intellij.json.psi.*
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.application.ReadAction
@@ -21,6 +23,7 @@ import com.intellij.util.Url
 import com.intellij.util.Urls
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.createDirectories
+import it.casaricci.hass.plugin.MyBundle
 import it.casaricci.hass.plugin.getConfiguration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -172,7 +175,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
     private fun refreshServices(module: Module, force: Boolean = false): Boolean {
         // TODO maybe invalidate the cache after some time?
         if (!isServicesCacheAvailable(module) || force) {
-            downloadServices(module, null)
+            downloadServices(module)
             return true
         }
         return false
@@ -181,7 +184,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
     private fun refreshStates(module: Module, force: Boolean = false): Boolean {
         // TODO maybe invalidate the cache after some time?
         if (!isStatesCacheAvailable(module) || force) {
-            downloadStates(module, null)
+            downloadStates(module)
             return true
         }
         return false
@@ -272,14 +275,16 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
         )
     }
 
+    /**
+     * Download services (actions) from Home Assistant. The returned information is saved as is.
+     */
     @OptIn(ExperimentalSerializationApi::class)
     @Suppress("UnstableApiUsage")
-    private fun downloadServices(module: Module, onComplete: (() -> Unit)?) {
+    private fun downloadServices(module: Module) {
         val log = thisLogger()
 
         cs.launch {
             lock.write {
-                // TODO error handling
                 val config = getConfiguration(module) ?: return@launch
                 val url = buildServicesUrl(config.instanceUrl) ?: return@launch
                 val cachedResponseFile = getServicesCacheFile(module)
@@ -288,19 +293,19 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
 
                 withBackgroundProgress(
                     module.project,
-                    // TODO i18n
-                    "Updating services data from Home Assistant",
+                    MyBundle.message("hass.notification.refreshCache.progress"),
                     cancellable = true
                 ) {
                     coroutineToIndicator {
-                        // TODO error handling
-                        downloadAndFormatJson(
-                            url,
-                            config.token,
-                            cachedResponseFile
-                        ) { data -> jsonFormatter.decodeFromStream<kotlinx.serialization.json.JsonArray>(data) }
-
-                        onComplete?.let { it() }
+                        try {
+                            downloadAndFormatJson(
+                                url,
+                                config.token,
+                                cachedResponseFile
+                            ) { data -> jsonFormatter.decodeFromStream<kotlinx.serialization.json.JsonArray>(data) }
+                        } catch (e: Exception) {
+                            notifyDownloadError(e.toString())
+                        }
                     }
                 }
             }
@@ -312,12 +317,11 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
      */
     @OptIn(ExperimentalSerializationApi::class)
     @Suppress("UnstableApiUsage")
-    private fun downloadStates(module: Module, onComplete: (() -> Unit)?) {
+    private fun downloadStates(module: Module) {
         val log = thisLogger()
 
         cs.launch {
             lock.write {
-                // TODO error handling
                 val config = getConfiguration(module) ?: return@launch
                 val url = buildStatesUrl(config.instanceUrl) ?: return@launch
                 val cachedResponseFile = getStatesCacheFile(module)
@@ -326,17 +330,17 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
 
                 withBackgroundProgress(
                     module.project,
-                    // TODO i18n
-                    "Updating states data from Home Assistant",
+                    MyBundle.message("hass.notification.refreshCache.progress"),
                     cancellable = true
                 ) {
                     coroutineToIndicator {
-                        // TODO error handling
-                        downloadAndFormatJson(url, config.token, cachedResponseFile) { data ->
-                            jsonFormatter.decodeFromStream<List<StateObject>>(data)
+                        try {
+                            downloadAndFormatJson(url, config.token, cachedResponseFile) { data ->
+                                jsonFormatter.decodeFromStream<List<StateObject>>(data)
+                            }
+                        } catch (e: Exception) {
+                            notifyDownloadError(e.toString())
                         }
-
-                        onComplete?.let { it() }
                     }
                 }
             }
@@ -344,6 +348,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
     }
 
     @OptIn(ExperimentalSerializationApi::class)
+    @Throws(IOException::class)
     private inline fun <reified T> downloadAndFormatJson(
         url: Url,
         accessToken: String,
@@ -364,12 +369,24 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                 }
             }
         val virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(cachedFile)
-        // TODO null checks
-        VfsUtil.markDirtyAndRefresh(false, false, true, virtualFile!!)
+            ?: throw IOException(MyBundle.message("hass.notification.refreshCache.failedLoadCachedFile"))
+        VfsUtil.markDirtyAndRefresh(false, false, true, virtualFile)
 
         ApplicationManager.getApplication().invokeLater {
             PsiManager.getInstance(project).dropPsiCaches()
         }
+    }
+
+    private fun notifyDownloadError(message: String) {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("Home Assistant data refresh")
+            .createNotification(
+                MyBundle.message("hass.notification.refreshCache.title"),
+                message,
+                NotificationType.ERROR
+            )
+            // TODO .addAction(<action for opening module settings>)
+            .notify(project)
     }
 
     @Throws(IOException::class)
