@@ -13,6 +13,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
 import com.intellij.psi.PsiManager
 import com.intellij.psi.util.*
@@ -172,7 +173,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                     ReadAction.compute<List<JsonProperty>, Throwable> {
                         val virtualFile = LocalFileSystem.getInstance().findFileByNioFile(getServicesCacheFile(module))
                         // TODO handle nulls
-                        val psiFile = PsiManager.getInstance(project).findFile(virtualFile!!)
+                        val psiFile = virtualFile!!.findPsiFile(module.project)
 
                         thisLogger().debug("Services data: $psiFile")
 
@@ -211,7 +212,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                     ReadAction.compute<List<JsonStringLiteral>, Throwable> {
                         val virtualFile = LocalFileSystem.getInstance().findFileByNioFile(getStatesCacheFile(module))
                         // TODO handle nulls
-                        val psiFile = PsiManager.getInstance(project).findFile(virtualFile!!)
+                        val psiFile = virtualFile!!.findPsiFile(module.project)
 
                         thisLogger().debug("States data: $psiFile")
 
@@ -341,7 +342,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
         VfsUtil.markDirtyAndRefresh(false, false, true, virtualFile!!)
 
         ApplicationManager.getApplication().invokeLater {
-            project.getService(PsiManager::class.java).dropPsiCaches()
+            PsiManager.getInstance(project).dropPsiCaches()
         }
     }
 

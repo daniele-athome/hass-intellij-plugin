@@ -3,18 +3,21 @@ package it.casaricci.hass.plugin.services
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiNamedElement
-import com.intellij.psi.search.FilenameIndex
+import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.GlobalSearchScopesCore
 import com.intellij.psi.util.*
 import it.casaricci.hass.plugin.HASS_DOMAIN_AUTOMATION
 import it.casaricci.hass.plugin.HASS_DOMAIN_SCRIPT
 import it.casaricci.hass.plugin.SECRETS_FILENAME
+import org.jetbrains.yaml.YAMLFileType
 import org.jetbrains.yaml.YAMLUtil
 import org.jetbrains.yaml.psi.YAMLFile
 import org.jetbrains.yaml.psi.YAMLKeyValue
@@ -122,23 +125,8 @@ class HassDataRepository(private val project: Project) {
             module,
             AUTOMATIONS_CACHE,
             {
-                val fileIndex = ProjectRootManager.getInstance(project).fileIndex
-                val allFiles =
-                    FilenameIndex.getAllFilesByExt(project, "yaml", GlobalSearchScope.projectScope(project))
-                val psiManager = PsiManager.getInstance(project)
-
                 CachedValueProvider.Result.create(buildList {
-                    for (file in allFiles) {
-                        // apparently GlobalSearchScope.moduleScope doesn't find the file
-                        if (module != fileIndex.getModuleForFile(file)) {
-                            continue
-                        }
-
-                        val yamlFile = psiManager.findFile(file) ?: continue
-                        if (yamlFile !is YAMLFile) {
-                            continue
-                        }
-
+                    for (yamlFile in findAllYamlPsiFiles(module)) {
                         // TODO is there a more efficient way to do this? This seems like an overkill...
                         YAMLUtil.getQualifiedKeyInFile(yamlFile, HASS_DOMAIN_AUTOMATION)?.let { automationBlock ->
                             automationBlock.childrenOfType<YAMLSequence>().firstOrNull()?.let { automations ->
@@ -166,7 +154,7 @@ class HassDataRepository(private val project: Project) {
                     for (contentRoot in ModuleRootManager.getInstance(module).contentRoots) {
                         val secretsFile = contentRoot.findChild(SECRETS_FILENAME)
                         if (secretsFile != null) {
-                            val yamlFile = PsiManager.getInstance(module.project).findFile(secretsFile) ?: continue
+                            val yamlFile = secretsFile.findPsiFile(module.project)
                             if (yamlFile !is YAMLFile) {
                                 continue
                             }
@@ -186,23 +174,8 @@ class HassDataRepository(private val project: Project) {
     }
 
     private fun getSecondLevelElementsByKeyName(module: Module, rootKey: String): Collection<YAMLKeyValue> {
-        val fileIndex = ProjectRootManager.getInstance(project).fileIndex
-        val allFiles =
-            FilenameIndex.getAllFilesByExt(project, "yaml", GlobalSearchScope.projectScope(project))
-        val psiManager = PsiManager.getInstance(project)
-
         return buildList {
-            for (file in allFiles) {
-                // apparently GlobalSearchScope.moduleScope doesn't find the file
-                if (module != fileIndex.getModuleForFile(file)) {
-                    continue
-                }
-
-                val yamlFile = psiManager.findFile(file) ?: continue
-                if (yamlFile !is YAMLFile) {
-                    continue
-                }
-
+            for (yamlFile in findAllYamlPsiFiles(module)) {
                 // TODO is there a more efficient way to do this? This seems like an overkill...
                 YAMLUtil.getQualifiedKeyInFile(yamlFile, rootKey)?.let { scriptBlock ->
                     scriptBlock.childrenOfType<YAMLMapping>().firstOrNull()?.let { scripts ->
@@ -213,6 +186,21 @@ class HassDataRepository(private val project: Project) {
                 }
             }
         }
+    }
+
+    private fun findAllYamlPsiFiles(module: Module): Collection<YAMLFile> {
+        return findAllYamlFiles(module).mapNotNull {
+            it.findPsiFile(module.project)
+        }.filterIsInstance<YAMLFile>()
+    }
+
+    private fun findAllYamlFiles(module: Module): Collection<VirtualFile> {
+        val scope = GlobalSearchScope.union(
+            module.rootManager.contentRoots.map {
+                GlobalSearchScopesCore.directoryScope(module.project, it, true)
+            }
+        )
+        return FileTypeIndex.getFiles(YAMLFileType.YML, scope)
     }
 
 }
