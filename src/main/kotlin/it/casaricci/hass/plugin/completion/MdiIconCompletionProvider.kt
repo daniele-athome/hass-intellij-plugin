@@ -3,6 +3,7 @@ package it.casaricci.hass.plugin.completion
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
+import com.intellij.codeInsight.lookup.AutoCompletionPolicy
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
@@ -39,7 +40,7 @@ class MdiIconCompletionProvider : CompletionProvider<CompletionParameters>(), Du
                 lookupList = MdiIconsRepository.loadIcons().map {
                     LookupElementBuilder.create(ICON_NAME_PREFIX + it.key)
                         .withIcon(MdiIconsRepository.getIcon(it.value))
-
+                        .withAutoCompletionPolicy(AutoCompletionPolicy.GIVE_CHANCE_TO_OVERWRITE)
                 }
             }
             return lookupList!!
