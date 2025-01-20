@@ -3,20 +3,32 @@
  */
 package it.casaricci.hass.plugin
 
-/**
- * Name of the secrets file.
- */
-const val SECRETS_FILENAME = "secrets.yaml"
+object HassKnownDomains {
 
-/**
- * Name of the script Home Assistant integration (i.e. root-level YAML key).
- */
-const val HASS_DOMAIN_SCRIPT = "script"
+    /**
+     * Name of the script Home Assistant integration (i.e. root-level YAML key).
+     */
+    const val SCRIPT = "script"
 
-/**
- * Name of the automation Home Assistant integration (i.e. root-level YAML key).
- */
-const val HASS_DOMAIN_AUTOMATION = "automation"
+    /**
+     * Name of the automation Home Assistant integration (i.e. root-level YAML key).
+     */
+    const val AUTOMATION = "automation"
+
+}
+
+object HassKnownFilenames {
+
+    /**
+     * Name of the entry point configuration file.
+     */
+    const val CONFIGURATION = "configuration.yaml"
+
+    /**
+     * Name of the secrets file.
+     */
+    const val SECRETS = "secrets.yaml"
+}
 
 /**
  * Domains that uses this form and can be resolved to local files:
@@ -28,7 +40,7 @@ const val HASS_DOMAIN_AUTOMATION = "automation"
  * ```
  */
 val KEY_NAME_DOMAINS = hashSetOf(
-    HASS_DOMAIN_SCRIPT,
+    HassKnownDomains.SCRIPT,
     "input_number",
     "input_select",
     "input_text",

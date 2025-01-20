@@ -6,8 +6,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiPolyVariantReferenceBase
 import com.intellij.psi.ResolveResult
-import it.casaricci.hass.plugin.HASS_DOMAIN_AUTOMATION
-import it.casaricci.hass.plugin.HASS_DOMAIN_SCRIPT
+import it.casaricci.hass.plugin.HassKnownDomains
 import it.casaricci.hass.plugin.KEY_NAME_DOMAINS
 import it.casaricci.hass.plugin.entityId
 import it.casaricci.hass.plugin.services.HassDataRepository
@@ -42,7 +41,7 @@ class HassEntityReference(
                 result = handleKeyNameDomain(module, domainName, entityName)
             } else {
                 when (domainName) {
-                    HASS_DOMAIN_AUTOMATION -> {
+                    HassKnownDomains.AUTOMATION -> {
                         result = handleAutomation(module, entityName)
                     }
                 }
@@ -101,7 +100,7 @@ class HassEntityReference(
     private fun handleGenericEntity(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
         val service = HassRemoteRepository.getInstance(module.project)
 
-        val states = service.getStates(module, HASS_DOMAIN_SCRIPT, HASS_DOMAIN_AUTOMATION)
+        val states = service.getStates(module, HassKnownDomains.SCRIPT, HassKnownDomains.AUTOMATION)
         if (states != null) {
             val entityId = "$domainName.$entityName"
             return states.filter {

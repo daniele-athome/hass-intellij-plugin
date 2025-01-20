@@ -14,9 +14,8 @@ import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.GlobalSearchScopesCore
 import com.intellij.psi.util.*
-import it.casaricci.hass.plugin.HASS_DOMAIN_AUTOMATION
-import it.casaricci.hass.plugin.HASS_DOMAIN_SCRIPT
-import it.casaricci.hass.plugin.SECRETS_FILENAME
+import it.casaricci.hass.plugin.HassKnownDomains
+import it.casaricci.hass.plugin.HassKnownFilenames
 import org.jetbrains.yaml.YAMLFileType
 import org.jetbrains.yaml.YAMLUtil
 import org.jetbrains.yaml.psi.YAMLFile
@@ -70,12 +69,12 @@ class HassDataRepository(private val project: Project) {
                 val remoteService = HassRemoteRepository.getInstance(module.project)
 
                 // TODO we should use local definitions for domains we can handle (groups, input_*, etc.)
-                val localEntities = this.getKeyNameDomainElements(module, HASS_DOMAIN_SCRIPT)
+                val localEntities = this.getKeyNameDomainElements(module, HassKnownDomains.SCRIPT)
                 // list of all entity id (to filter out duplicates from remote entities)
                 val allEntityIds = localEntities.map { it.keyText }.toHashSet()
 
                 val remoteEntities =
-                    remoteService.getStates(module, HASS_DOMAIN_SCRIPT)?.filter { action ->
+                    remoteService.getStates(module, HassKnownDomains.SCRIPT)?.filter { action ->
                         !allEntityIds.contains(action.name)
                     }
 
@@ -98,7 +97,7 @@ class HassDataRepository(private val project: Project) {
             {
                 val remoteService = HassRemoteRepository.getInstance(module.project)
 
-                val localActions = this.getKeyNameDomainElements(module, HASS_DOMAIN_SCRIPT)
+                val localActions = this.getKeyNameDomainElements(module, HassKnownDomains.SCRIPT)
                 // list of all script names (to filter out duplicates from remote services)
                 val allScriptNames = localActions.map { it.keyText }.toHashSet()
 
@@ -128,7 +127,7 @@ class HassDataRepository(private val project: Project) {
                 CachedValueProvider.Result.create(buildList {
                     for (yamlFile in findAllYamlPsiFiles(module)) {
                         // TODO is there a more efficient way to do this? This seems like an overkill...
-                        YAMLUtil.getQualifiedKeyInFile(yamlFile, HASS_DOMAIN_AUTOMATION)?.let { automationBlock ->
+                        YAMLUtil.getQualifiedKeyInFile(yamlFile, HassKnownDomains.AUTOMATION)?.let { automationBlock ->
                             automationBlock.childrenOfType<YAMLSequence>().firstOrNull()?.let { automations ->
                                 addAll(
                                     automations.items
@@ -152,7 +151,7 @@ class HassDataRepository(private val project: Project) {
             {
                 val result = buildList {
                     for (contentRoot in ModuleRootManager.getInstance(module).contentRoots) {
-                        val secretsFile = contentRoot.findChild(SECRETS_FILENAME)
+                        val secretsFile = contentRoot.findChild(HassKnownFilenames.SECRETS)
                         if (secretsFile != null) {
                             val yamlFile = secretsFile.findPsiFile(module.project)
                             if (yamlFile !is YAMLFile) {
