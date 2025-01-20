@@ -39,7 +39,7 @@ object HassKnownFilenames {
  *     ...
  * ```
  */
-val KEY_NAME_DOMAINS = hashSetOf(
+val SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS = hashSetOf(
     HassKnownDomains.SCRIPT,
     "input_number",
     "input_select",
@@ -49,3 +49,6 @@ val KEY_NAME_DOMAINS = hashSetOf(
     "group",
     "shell_command",
 )
+
+// TODO val SECOND_LEVEL_ATTRIBUTE_IDENTIFIER_DOMAINS = ...
+//      for things like automations which are identified by an attribute (e.g. "alias" for automations)

@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiPolyVariantReferenceBase
 import com.intellij.psi.ResolveResult
 import it.casaricci.hass.plugin.HassKnownDomains
-import it.casaricci.hass.plugin.KEY_NAME_DOMAINS
+import it.casaricci.hass.plugin.SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS
 import it.casaricci.hass.plugin.entityId
 import it.casaricci.hass.plugin.services.HassDataRepository
 import it.casaricci.hass.plugin.services.HassRemoteRepository
@@ -37,7 +37,7 @@ class HassEntityReference(
         if (module != null) {
             var result: Array<ResolveResult>? = null
 
-            if (KEY_NAME_DOMAINS.contains(domainName)) {
+            if (SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS.contains(domainName)) {
                 result = handleKeyNameDomain(module, domainName, entityName)
             } else {
                 when (domainName) {
