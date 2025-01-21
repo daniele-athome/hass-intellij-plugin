@@ -202,10 +202,9 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                 val result: List<JsonProperty>? = if (isServicesCacheAvailable(module)) {
                     ReadAction.compute<List<JsonProperty>, Throwable> {
                         val virtualFile = LocalFileSystem.getInstance().findFileByNioFile(getServicesCacheFile(module))
-                        // TODO handle nulls
+                        // TODO weird situation: the cache file was available but the IDEs can't provide a VirtualFile.
+                        //      Deserves an error notification with un unbelievable message.
                         val psiFile = virtualFile!!.findPsiFile(module.project)
-
-                        thisLogger().debug("Services data: $psiFile")
 
                         if (psiFile is JsonFile && psiFile.topLevelValue is JsonArray) {
                             (psiFile.topLevelValue as JsonArray).valueList.filter {
@@ -219,7 +218,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                     (domainObject.findProperty("services")?.value as JsonObject).propertyList
                                 }
                         } else {
-                            // TODO wrong file content???
+                            // TODO corrupted file?? Deserves an unbelievable error notification.
                             emptyList()
                         }
                     }
@@ -241,10 +240,9 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                 val result: List<JsonStringLiteral>? = if (isStatesCacheAvailable(module)) {
                     ReadAction.compute<List<JsonStringLiteral>, Throwable> {
                         val virtualFile = LocalFileSystem.getInstance().findFileByNioFile(getStatesCacheFile(module))
-                        // TODO handle nulls
+                        // TODO weird situation: the cache file was available but the IDEs can't provide a VirtualFile.
+                        //      Deserves an error notification with un unbelievable message.
                         val psiFile = virtualFile!!.findPsiFile(module.project)
-
-                        thisLogger().debug("States data: $psiFile")
 
                         if (psiFile is JsonFile && psiFile.topLevelValue is JsonArray) {
                             (psiFile.topLevelValue as JsonArray).valueList.filter {
@@ -262,7 +260,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                     entityObject.findProperty("entity_id")?.value as JsonStringLiteral
                                 }
                         } else {
-                            // TODO wrong file content???
+                            // TODO corrupted file?? Deserves an unbelievable error notification.
                             emptyList()
                         }
                     }

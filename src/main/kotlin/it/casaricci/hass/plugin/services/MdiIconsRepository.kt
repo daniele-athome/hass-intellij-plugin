@@ -12,7 +12,6 @@ import javax.swing.Icon
 @Serializable
 data class IconObject(val name: String, val aliases: List<String>)
 
-// FIXME icons are black by default, ignoring IDE theme
 object MdiIconsRepository {
 
     private val json = Json { ignoreUnknownKeys = true }

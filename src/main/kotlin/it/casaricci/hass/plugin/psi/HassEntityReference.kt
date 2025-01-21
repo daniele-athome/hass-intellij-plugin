@@ -87,7 +87,6 @@ class HassEntityReference(
 
         val services = service.getServices(module)
         if (services != null) {
-            // TODO convert data structures to avoid traversing the tree again
             return PsiElementResolveResult.createResults(services.filter {
                 it.name == entityName && getDomainNameFromActionName(it) == domainName
             })

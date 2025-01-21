@@ -172,6 +172,7 @@ class HassDataRepository(private val project: Project) {
         )
     }
 
+    // TODO method documentation
     private fun getSecondLevelElementsByKeyName(module: Module, rootKey: String): Collection<YAMLKeyValue> {
         return buildList {
             for (yamlFile in findAllYamlPsiFiles(module)) {
