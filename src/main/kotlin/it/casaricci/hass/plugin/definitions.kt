@@ -52,3 +52,8 @@ val SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS = hashSetOf(
 
 // TODO val SECOND_LEVEL_ATTRIBUTE_IDENTIFIER_DOMAINS = ...
 //      for things like automations which are identified by an attribute (e.g. "alias" for automations)
+
+/**
+ * Token prefix to be used in secret reference.
+ */
+const val HASS_TOKEN_SECRET = "!secret"
