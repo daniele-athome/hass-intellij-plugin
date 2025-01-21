@@ -47,15 +47,12 @@ class HassEntityCompletionProvider : CompletionProvider<CompletionParameters>() 
                     }
                 }
             }?.let { actionName ->
-                // TODO do we need to check for a prefix match? Doesn't addElement do that already?
-                if (resultSet.prefixMatcher.prefixMatches(actionName)) {
-                    resultSet.addElement(
-                        LookupElementBuilder.create(actionName)
-                            .withPsiElement(entity)
-                            .withCaseSensitivity(true)
-                            .withAutoCompletionPolicy(AutoCompletionPolicy.GIVE_CHANCE_TO_OVERWRITE)
-                    )
-                }
+                resultSet.addElement(
+                    LookupElementBuilder.create(actionName)
+                        .withPsiElement(entity)
+                        .withCaseSensitivity(true)
+                        .withAutoCompletionPolicy(AutoCompletionPolicy.GIVE_CHANCE_TO_OVERWRITE)
+                )
             }
         }
     }

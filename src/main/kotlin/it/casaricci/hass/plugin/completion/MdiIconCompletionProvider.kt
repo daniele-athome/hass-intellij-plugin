@@ -24,9 +24,7 @@ class MdiIconCompletionProvider : CompletionProvider<CompletionParameters>(), Du
         // FIXME replacing with tab replaces only "mdi:" and not the whole string
         // useless advertisement, links are not clickable
         // resultSet.addLookupAdvertisement("Icons available at https://materialdesignicons.com/")
-        resultSet.addAllElements(cache.filter {
-            resultSet.prefixMatcher.prefixMatches(it)
-        })
+        resultSet.addAllElements(cache)
     }
 
     companion object {
