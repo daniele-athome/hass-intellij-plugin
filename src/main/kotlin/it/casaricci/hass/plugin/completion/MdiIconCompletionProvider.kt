@@ -8,6 +8,7 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.util.ProcessingContext
+import it.casaricci.hass.plugin.ICON_NAME_PREFIX
 import it.casaricci.hass.plugin.services.MdiIconsRepository
 import org.jetbrains.annotations.NotNull
 
@@ -30,8 +31,6 @@ class MdiIconCompletionProvider : CompletionProvider<CompletionParameters>(), Du
     }
 
     companion object {
-        private const val ICON_NAME_PREFIX = "mdi:"
-
         // keep in memory all the elements
         private var lookupList: List<LookupElement>? = null
 

@@ -57,3 +57,8 @@ val SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS = hashSetOf(
  * Token prefix to be used in secret reference.
  */
 const val HASS_TOKEN_SECRET = "!secret"
+
+/**
+ * Prefix of all icon names.
+ */
+const val ICON_NAME_PREFIX = "mdi:"
