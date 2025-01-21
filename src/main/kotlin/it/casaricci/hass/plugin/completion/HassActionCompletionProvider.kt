@@ -27,8 +27,6 @@ class HassActionCompletionProvider : CompletionProvider<CompletionParameters>() 
         val service = HassDataRepository.getInstance(module.project)
 
         // we should maybe cache LookupElement objects, but we don't have a way to purge them when things change
-        // FIXME potentially blocking (reads from file system);
-        //       anyway we should request data from network when not available and put a modal
         service.getActions(module).forEach { action ->
             let {
                 when (action) {
