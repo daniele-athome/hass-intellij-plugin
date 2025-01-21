@@ -9,10 +9,10 @@ import com.intellij.psi.ResolveResult
 import it.casaricci.hass.plugin.HassKnownDomains
 import it.casaricci.hass.plugin.SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS
 import it.casaricci.hass.plugin.entityId
+import it.casaricci.hass.plugin.isActionCall
 import it.casaricci.hass.plugin.services.HassDataRepository
 import it.casaricci.hass.plugin.services.HassRemoteRepository
 import it.casaricci.hass.plugin.services.getDomainNameFromActionName
-import org.jetbrains.yaml.psi.YAMLKeyValue
 import org.jetbrains.yaml.psi.YAMLScalar
 
 class HassEntityReference(
@@ -111,13 +111,6 @@ class HassEntityReference(
         }
 
         return ResolveResult.EMPTY_ARRAY
-    }
-
-    private fun isActionCall(element: YAMLScalar): Boolean {
-        // TODO constantize
-        return element.parent is YAMLKeyValue &&
-                ((element.parent as YAMLKeyValue).keyText == "action" ||
-                        (element.parent as YAMLKeyValue).keyText == "service")
     }
 
 }

@@ -4,6 +4,8 @@ import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.yaml.YAMLFileType
+import org.jetbrains.yaml.psi.YAMLKeyValue
+import org.jetbrains.yaml.psi.YAMLScalar
 
 // TODO this should start from configuration.yaml and walk all includes (in order to filter out unwanted files)
 fun isHassConfigFile(virtualFile: VirtualFile, project: Project): Boolean {
@@ -14,3 +16,9 @@ fun isHassConfigFile(virtualFile: VirtualFile, project: Project): Boolean {
 }
 
 fun entityId(domainName: String, entityName: String): String = "$domainName.$entityName"
+
+fun isActionCall(element: YAMLScalar): Boolean {
+    return element.parent is YAMLKeyValue &&
+            ((element.parent as YAMLKeyValue).keyText == "action" ||
+                    (element.parent as YAMLKeyValue).keyText == "service")
+}
