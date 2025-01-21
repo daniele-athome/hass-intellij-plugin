@@ -6,6 +6,7 @@ import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.*
 import com.intellij.util.ProcessingContext
 import it.casaricci.hass.plugin.HASS_TOKEN_SECRET
+import it.casaricci.hass.plugin.splitEntityId
 import org.jetbrains.yaml.psi.YAMLScalar
 
 private const val PREFIX_SECRET = "$HASS_TOKEN_SECRET "
@@ -34,11 +35,8 @@ internal class HassReferenceContributor : PsiReferenceContributor() {
                     return arrayOf(
                         HassSecretReference(originalElement, range, range.substring(text))
                     )
-                } else if (isEntityId(originalElement)) {
-                    // TODO We should keep a local catalog of all domains (extracted from entities REST API) and just
-                    //      handle all strings matching "^[A-Za-z0-9_]*\.[A-Za-z0-9_]*$"
-                    val domainName = text.substringBefore(".", "")
-                    val actionName = text.substringAfter(".", "")
+                } else {
+                    val (domainName, actionName) = splitEntityId(text)
                     if (domainName.isNotEmpty() && actionName.isNotEmpty()) {
                         val range = TextRange.from(domainName.length + 1, actionName.length)
                         return arrayOf(
@@ -49,10 +47,6 @@ internal class HassReferenceContributor : PsiReferenceContributor() {
             }
 
             return PsiReference.EMPTY_ARRAY
-        }
-
-        private fun isEntityId(element: YAMLScalar): Boolean {
-            return element.textValue.matches(Regex("^[A-Za-z0-9_]*\\.[A-Za-z0-9_]*$"))
         }
     }
 

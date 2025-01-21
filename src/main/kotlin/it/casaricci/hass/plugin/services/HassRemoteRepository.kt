@@ -25,6 +25,7 @@ import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.createDirectories
 import it.casaricci.hass.plugin.MyBundle
 import it.casaricci.hass.plugin.getConfiguration
+import it.casaricci.hass.plugin.splitEntityId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -250,7 +251,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                 if (it is JsonObject) {
                                     val entityIdElement = it.findProperty("entity_id")?.value
                                     if (entityIdElement is JsonStringLiteral) {
-                                        val domainName = entityIdElement.value.substringBefore(".", "")
+                                        val (domainName, _) = splitEntityId(entityIdElement.value)
                                         !excludeDomains.contains(domainName)
                                     } else false
                                 } else false
