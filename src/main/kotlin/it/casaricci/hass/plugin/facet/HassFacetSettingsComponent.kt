@@ -37,8 +37,6 @@ class HassFacetSettingsComponent {
                 border = JBUI.Borders.empty(10)
             }
 
-        // TODO refresh button listener
-
         panel = JPanel(BorderLayout()).apply {
             add(contentPanel, BorderLayout.NORTH)
         }

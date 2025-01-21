@@ -19,7 +19,6 @@ class HassScriptFindUsagesProvider : FindUsagesProvider {
     }
 
     override fun getHelpId(element: PsiElement): String? {
-        // TODO
         return null
     }
 
