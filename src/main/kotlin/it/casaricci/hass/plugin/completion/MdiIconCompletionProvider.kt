@@ -6,9 +6,13 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.AutoCompletionPolicy
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.DumbAware
+import com.intellij.openapi.project.Project
 import com.intellij.util.ProcessingContext
 import it.casaricci.hass.plugin.ICON_NAME_PREFIX
+import it.casaricci.hass.plugin.MyBundle
 import it.casaricci.hass.plugin.services.MdiIconsRepository
 import org.jetbrains.annotations.NotNull
 
@@ -23,7 +27,12 @@ class MdiIconCompletionProvider : CompletionProvider<CompletionParameters>(), Du
         @NotNull context: ProcessingContext,
         @NotNull resultSet: CompletionResultSet
     ) {
-        val cache = initCache()
+        val cache = try {
+            initCache()
+        } catch (e: Exception) {
+            notifyLoadIconsError(parameters.position.project, e.toString())
+            return
+        }
 
         // useless advertisement, links are not clickable
         // resultSet.addLookupAdvertisement("Icons available at https://materialdesignicons.com/")
@@ -44,6 +53,17 @@ class MdiIconCompletionProvider : CompletionProvider<CompletionParameters>(), Du
             }
             return lookupList!!
         }
+    }
+
+    private fun notifyLoadIconsError(project: Project, message: String) {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("Home Assistant load icon error")
+            .createNotification(
+                MyBundle.message("hass.notification.loadIconsError.title"),
+                message,
+                NotificationType.ERROR
+            )
+            .notify(project)
     }
 
 }

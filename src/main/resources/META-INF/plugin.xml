@@ -33,6 +33,9 @@
         <notificationGroup id="Home Assistant data refresh"
                            displayType="BALLOON"
                            key="hass.notification.refreshCache.title"/>
+        <notificationGroup id="Home Assistant load icon error"
+                           displayType="BALLOON"
+                           key="hass.notification.loadIconsError.title"/>
     </extensions>
 
     <extensions defaultExtensionNs="JavaScript.JsonSchema">
