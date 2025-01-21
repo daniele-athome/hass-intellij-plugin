@@ -17,6 +17,9 @@ class ProjectSettingsConfigurableProvider(private val project: Project) : Config
 
 }
 
-// TODO check for other IDEs not supporting facets
+/**
+ * Only IntelliJ IDEA supports facets, apparently. For all other IDEs we will use project settings.
+ */
+// TODO should we add Android Studio?
 @Suppress("UnstableApiUsage")
-fun usesProjectSettings(): Boolean = PlatformUtils.isPyCharm()
+fun usesProjectSettings(): Boolean = !PlatformUtils.isIntelliJ()
