@@ -11,7 +11,10 @@ import com.intellij.util.ProcessingContext
 import it.casaricci.hass.plugin.services.MdiIconsRepository
 import org.jetbrains.annotations.NotNull
 
-// FIXME this is unbearably slow
+/**
+ * Provides completions for mdi:icons.
+ * [Unbearably slow](https://github.com/daniele-athome/hass-intellij-plugin/issues/7).
+ */
 class MdiIconCompletionProvider : CompletionProvider<CompletionParameters>(), DumbAware {
 
     public override fun addCompletions(
