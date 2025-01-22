@@ -1,11 +1,16 @@
 package it.casaricci.hass.plugin
 
 import com.intellij.openapi.module.ModuleUtil
+import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.NlsSafe
+import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.openapi.vfs.VirtualFile
+import org.apache.commons.io.input.CountingInputStream
 import org.jetbrains.yaml.YAMLFileType
 import org.jetbrains.yaml.psi.YAMLKeyValue
 import org.jetbrains.yaml.psi.YAMLScalar
+import java.io.InputStream
 
 // TODO this should start from configuration.yaml and walk all includes (in order to filter out unwanted files)
 fun isHassConfigFile(virtualFile: VirtualFile, project: Project): Boolean {
@@ -32,4 +37,55 @@ fun isActionCall(element: YAMLScalar): Boolean {
     return element.parent is YAMLKeyValue &&
             ((element.parent as YAMLKeyValue).keyText == "action" ||
                     (element.parent as YAMLKeyValue).keyText == "service")
+}
+
+/**
+ * An [InputStream] that updates a [ProgressIndicator] while being read.
+ * I was surprised that the IntelliJ SDK didn't provide such a utility (or at least I didn't find any).
+ */
+class ProgressIndicatorInputStream(
+    stream: InputStream?,
+    private val contentLength: Long,
+    private val indicator: ProgressIndicator
+) : CountingInputStream(stream) {
+
+    init {
+        indicator.checkCanceled()
+        indicator.isIndeterminate = contentLength <= 0
+    }
+
+    override fun afterRead(n: Int) {
+        super.afterRead(n)
+        indicator.checkCanceled()
+        if (contentLength > 0) {
+            updateIndicator(indicator, count.toLong(), contentLength)
+        }
+    }
+
+    /**
+     * Copied from [com.intellij.util.net.NetUtils.updateIndicator].
+     */
+    private fun updateIndicator(
+        indicator: ProgressIndicator,
+        bytesDownloaded: Long,
+        contentLength: Long,
+    ) {
+        val fraction = bytesDownloaded.toDouble() / contentLength
+        val rankForContentLength = StringUtilRt.rankForFileSize(contentLength)
+        val formattedContentLength =
+            StringUtilRt.formatFileSize(contentLength, " ", rankForContentLength)
+        val formattedTotalProgress =
+            StringUtilRt.formatFileSize(bytesDownloaded, " ", rankForContentLength)
+
+        @Suppress("UnstableApiUsage")
+        val indicatorText: @NlsSafe String = String.format(
+            "<html><code>%.0f%% · %s⧸%s</code></html>", fraction * 100,
+            formattedTotalProgress,
+            formattedContentLength
+        )
+        indicator.text2 = indicatorText
+        indicator.fraction = fraction
+    }
+
+
 }

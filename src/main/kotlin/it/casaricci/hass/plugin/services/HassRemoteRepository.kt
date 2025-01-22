@@ -12,6 +12,7 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModulePointerManager
 import com.intellij.openapi.progress.ProcessCanceledException
+import com.intellij.openapi.progress.ProgressIndicatorProvider
 import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
@@ -27,6 +28,7 @@ import com.intellij.util.Urls
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.createDirectories
 import it.casaricci.hass.plugin.MyBundle
+import it.casaricci.hass.plugin.ProgressIndicatorInputStream
 import it.casaricci.hass.plugin.getConfiguration
 import it.casaricci.hass.plugin.splitEntityId
 import kotlinx.coroutines.CoroutineScope
@@ -330,7 +332,16 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                 url,
                                 config.token,
                                 cachedResponseFile
-                            ) { data -> jsonFormatter.decodeFromStream<kotlinx.serialization.json.JsonArray>(data) }
+                            ) { data, length ->
+                                val stream = ProgressIndicatorInputStream(
+                                    data, length,
+                                    ProgressIndicatorProvider.getGlobalProgressIndicator()
+                                )
+                                jsonFormatter.decodeFromStream<kotlinx.serialization.json.JsonArray>(stream)
+                            }
+                        } catch (e: ProcessCanceledException) {
+                            // canceled
+                            throw e
                         } catch (e: Exception) {
                             log.error("Unable to download services", e)
                             notifyDownloadError(module, e.toString())
@@ -364,9 +375,16 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                 ) {
                     coroutineToIndicator {
                         try {
-                            downloadAndFormatJson(url, config.token, cachedResponseFile) { data ->
-                                jsonFormatter.decodeFromStream<List<StateObject>>(data)
+                            downloadAndFormatJson(url, config.token, cachedResponseFile) { data, length ->
+                                val stream = ProgressIndicatorInputStream(
+                                    data, length,
+                                    ProgressIndicatorProvider.getGlobalProgressIndicator()
+                                )
+                                jsonFormatter.decodeFromStream<List<StateObject>>(stream)
                             }
+                        } catch (e: ProcessCanceledException) {
+                            // canceled
+                            throw e
                         } catch (e: Exception) {
                             log.error("Unable to download states", e)
                             notifyDownloadError(module, e.toString())
@@ -383,7 +401,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
         url: Url,
         accessToken: String,
         cachedFile: Path,
-        crossinline decoder: (data: InputStream) -> T
+        crossinline decoder: (data: InputStream, length: Long) -> T
     ) {
         ensureCachePathExists()
 
@@ -392,8 +410,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                 conn.addRequestProperty("Authorization", "Bearer $accessToken")
             }
             .connect { request ->
-                // TODO no progress update...
-                val jsonData = decoder(request.inputStream)
+                val jsonData = decoder(request.inputStream, request.connection.contentLengthLong)
                 FileOutputStream(cachedFile.toFile()).use { stream ->
                     jsonFormatter.encodeToStream(jsonData, stream)
                 }
