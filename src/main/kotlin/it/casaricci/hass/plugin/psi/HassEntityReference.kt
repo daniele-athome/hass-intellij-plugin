@@ -66,7 +66,7 @@ class HassEntityReference(
 
     private fun handleKeyNameDomain(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
         val service = HassDataRepository.getInstance(module.project)
-        return service.getKeyNameDomainElements(module, domainName).filter {
+        return service.getKeyValueElementsForDomain(module, domainName).filter {
             it.keyText == entityName
         }
             .map { result -> PsiElementResolveResult(result) }

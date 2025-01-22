@@ -46,7 +46,25 @@ class HassDataRepository(private val project: Project) {
 
     // TODO lots of duplicated and unefficient code here
 
-    fun getKeyNameDomainElements(module: Module, domainName: String): Collection<YAMLKeyValue> {
+    /**
+     * Returns a list of all second level key-value elements (under the given first level key)
+     * in all YAML files in the module.
+     *
+     * ```yaml
+     * script:
+     *   example_script1:  # selected
+     *      [...]
+     *
+     * automation:
+     *   - alias: first automation # NOT selected: not a key-value direct descendant
+     *     [...]
+     *
+     * input_text:
+     *   field_test: # selected
+     *     [...]
+     * ```
+     */
+    fun getKeyValueElementsForDomain(module: Module, domainName: String): Collection<YAMLKeyValue> {
         return CachedValuesManager.getManager(project).getCachedValue(
             module,
             getCacheKey(domainName),
@@ -69,7 +87,7 @@ class HassDataRepository(private val project: Project) {
                 val remoteService = HassRemoteRepository.getInstance(module.project)
 
                 // TODO we should use local definitions for domains we can handle (groups, input_*, etc.)
-                val localEntities = this.getKeyNameDomainElements(module, HassKnownDomains.SCRIPT)
+                val localEntities = this.getKeyValueElementsForDomain(module, HassKnownDomains.SCRIPT)
                 // list of all entity id (to filter out duplicates from remote entities)
                 val allEntityIds = localEntities.map { it.keyText }.toHashSet()
 
@@ -97,7 +115,7 @@ class HassDataRepository(private val project: Project) {
             {
                 val remoteService = HassRemoteRepository.getInstance(module.project)
 
-                val localActions = this.getKeyNameDomainElements(module, HassKnownDomains.SCRIPT)
+                val localActions = this.getKeyValueElementsForDomain(module, HassKnownDomains.SCRIPT)
                 // list of all script names (to filter out duplicates from remote services)
                 val allScriptNames = localActions.map { it.keyText }.toHashSet()
 
@@ -172,7 +190,9 @@ class HassDataRepository(private val project: Project) {
         )
     }
 
-    // TODO method documentation
+    /**
+     * See [getKeyValueElementsForDomain].
+     */
     private fun getSecondLevelElementsByKeyName(module: Module, rootKey: String): Collection<YAMLKeyValue> {
         return buildList {
             for (yamlFile in findAllYamlPsiFiles(module)) {
