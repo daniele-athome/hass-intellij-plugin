@@ -1,6 +1,7 @@
 package it.casaricci.hass.plugin.services
 
 import com.intellij.json.psi.*
+import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
@@ -9,6 +10,7 @@ import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModulePointerManager
 import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
@@ -201,12 +203,16 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
             {
                 val result: List<JsonProperty>? = if (isServicesCacheAvailable(module)) {
                     ReadAction.compute<List<JsonProperty>, Throwable> {
-                        val virtualFile = LocalFileSystem.getInstance().findFileByNioFile(getServicesCacheFile(module))
-                        // TODO weird situation: the cache file was available but the IDEs can't provide a VirtualFile.
-                        //      Deserves an error notification with un unbelievable message.
-                        val psiFile = virtualFile!!.findPsiFile(module.project)
+                        try {
+                            val virtualFile = LocalFileSystem.getInstance()
+                                .findFileByNioFile(getServicesCacheFile(module))
+                                ?: throw IOException("Cache file disappeared")
 
-                        if (psiFile is JsonFile && psiFile.topLevelValue is JsonArray) {
+                            val psiFile = virtualFile.findPsiFile(module.project)
+                            if (psiFile !is JsonFile || psiFile.topLevelValue !is JsonArray) {
+                                throw IOException("Corrupted or unparseable cache file")
+                            }
+
                             (psiFile.topLevelValue as JsonArray).valueList.filter {
                                 if (it is JsonObject) {
                                     val domainNameElement = it.findProperty("domain")?.value
@@ -217,12 +223,17 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                     val domainObject = it as JsonObject
                                     (domainObject.findProperty("services")?.value as JsonObject).propertyList
                                 }
-                        } else {
-                            // TODO corrupted file?? Deserves an unbelievable error notification.
-                            emptyList()
+
+                        } catch (e: Exception) {
+                            notifyUnexpectedError(
+                                module,
+                                MyBundle.message("hass.notification.dataCacheError.genericError")
+                            )
+                            null
                         }
                     }
                 } else {
+                    thisLogger().info("Data cache not available (yet?)")
                     null
                 }
 
@@ -239,12 +250,16 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
             {
                 val result: List<JsonStringLiteral>? = if (isStatesCacheAvailable(module)) {
                     ReadAction.compute<List<JsonStringLiteral>, Throwable> {
-                        val virtualFile = LocalFileSystem.getInstance().findFileByNioFile(getStatesCacheFile(module))
-                        // TODO weird situation: the cache file was available but the IDEs can't provide a VirtualFile.
-                        //      Deserves an error notification with un unbelievable message.
-                        val psiFile = virtualFile!!.findPsiFile(module.project)
+                        try {
+                            val virtualFile = LocalFileSystem.getInstance()
+                                .findFileByNioFile(getStatesCacheFile(module))
+                                ?: throw IOException("Cache file disappeared")
 
-                        if (psiFile is JsonFile && psiFile.topLevelValue is JsonArray) {
+                            val psiFile = virtualFile.findPsiFile(module.project)
+                            if (psiFile !is JsonFile || psiFile.topLevelValue !is JsonArray) {
+                                throw IOException("Corrupted or unparseable cache file")
+                            }
+
                             (psiFile.topLevelValue as JsonArray).valueList.filter {
                                 if (it is JsonObject) {
                                     val entityIdElement = it.findProperty("entity_id")?.value
@@ -259,12 +274,17 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                     val entityObject = it as JsonObject
                                     entityObject.findProperty("entity_id")?.value as JsonStringLiteral
                                 }
-                        } else {
-                            // TODO corrupted file?? Deserves an unbelievable error notification.
-                            emptyList()
+
+                        } catch (e: Exception) {
+                            notifyUnexpectedError(
+                                module,
+                                MyBundle.message("hass.notification.dataCacheError.genericError")
+                            )
+                            null
                         }
                     }
                 } else {
+                    thisLogger().info("Data cache not available (yet?)")
                     null
                 }
 
@@ -303,7 +323,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                 cachedResponseFile
                             ) { data -> jsonFormatter.decodeFromStream<kotlinx.serialization.json.JsonArray>(data) }
                         } catch (e: Exception) {
-                            notifyDownloadError(e.toString())
+                            notifyDownloadError(module, e.toString())
                         }
                     }
                 }
@@ -338,7 +358,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                 jsonFormatter.decodeFromStream<List<StateObject>>(data)
                             }
                         } catch (e: Exception) {
-                            notifyDownloadError(e.toString())
+                            notifyDownloadError(module, e.toString())
                         }
                     }
                 }
@@ -376,7 +396,10 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
         }
     }
 
-    private fun notifyDownloadError(message: String) {
+    /**
+     * Download error notification (usually network issues).
+     */
+    private fun notifyDownloadError(module: Module, message: String) {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("Home Assistant data refresh")
             .createNotification(
@@ -385,6 +408,28 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                 NotificationType.ERROR
             )
             // TODO .addAction(<action for opening module settings>)
+            .notify(project)
+    }
+
+    /**
+     * Unexpected error notification (usually bugs or weird things happening).
+     */
+    private fun notifyUnexpectedError(module: Module, message: String) {
+        val moduleRef = ModulePointerManager.getInstance(module.project).create(module)
+
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("Home Assistant data cache error")
+            .createNotification(
+                MyBundle.message("hass.notification.dataCacheError.title"),
+                message,
+                NotificationType.ERROR
+            )
+            .addAction(NotificationAction.create("Refresh data", "refresh-cache") { anAction, notification ->
+                moduleRef.module?.let { module ->
+                    refreshCache(module, true)
+                }
+                notification.hideBalloon()
+            })
             .notify(project)
     }
 
