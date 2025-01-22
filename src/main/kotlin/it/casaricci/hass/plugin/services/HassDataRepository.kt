@@ -46,8 +46,6 @@ private fun getCacheKey(vararg domainNames: String): Key<CachedValue<Collection<
 @Service(Service.Level.PROJECT)
 class HassDataRepository(private val project: Project) {
 
-    // TODO lots of duplicated and unefficient code here
-
     /**
      * Returns a list of all second-level key-value elements (under the given first level keys - i.e. entity domains)
      * in all YAML files in the module.
@@ -156,7 +154,6 @@ class HassDataRepository(private val project: Project) {
                                         .flatMap { automation ->
                                             automation.childrenOfType<YAMLMapping>().first().keyValues
                                         })
-                                // TODO some filter here maybe?
                             }
                         }
                     }
