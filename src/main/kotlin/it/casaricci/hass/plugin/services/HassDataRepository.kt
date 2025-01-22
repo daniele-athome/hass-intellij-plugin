@@ -49,7 +49,7 @@ class HassDataRepository(private val project: Project) {
     // TODO lots of duplicated and unefficient code here
 
     /**
-     * Returns a list of all second-level key-value elements (under the given first level keys - i.e. entity domain)
+     * Returns a list of all second-level key-value elements (under the given first level keys - i.e. entity domains)
      * in all YAML files in the module.
      *
      * ```yaml
