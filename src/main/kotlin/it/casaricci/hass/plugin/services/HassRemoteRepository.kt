@@ -11,6 +11,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModulePointerManager
+import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
@@ -224,7 +225,11 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                     (domainObject.findProperty("services")?.value as JsonObject).propertyList
                                 }
 
+                        } catch (e: ProcessCanceledException) {
+                            // canceled
+                            throw e
                         } catch (e: Exception) {
+                            thisLogger().error("Unable to load data cache", e)
                             notifyUnexpectedError(
                                 module,
                                 MyBundle.message("hass.notification.dataCacheError.genericError")
@@ -275,7 +280,11 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                     entityObject.findProperty("entity_id")?.value as JsonStringLiteral
                                 }
 
+                        } catch (e: ProcessCanceledException) {
+                            // canceled
+                            throw e
                         } catch (e: Exception) {
+                            thisLogger().error("Unable to load data cache", e)
                             notifyUnexpectedError(
                                 module,
                                 MyBundle.message("hass.notification.dataCacheError.genericError")
@@ -323,6 +332,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                 cachedResponseFile
                             ) { data -> jsonFormatter.decodeFromStream<kotlinx.serialization.json.JsonArray>(data) }
                         } catch (e: Exception) {
+                            log.error("Unable to download services", e)
                             notifyDownloadError(module, e.toString())
                         }
                     }
@@ -358,6 +368,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                 jsonFormatter.decodeFromStream<List<StateObject>>(data)
                             }
                         } catch (e: Exception) {
+                            log.error("Unable to download states", e)
                             notifyDownloadError(module, e.toString())
                         }
                     }
