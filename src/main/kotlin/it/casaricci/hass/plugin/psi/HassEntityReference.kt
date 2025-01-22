@@ -64,9 +64,13 @@ class HassEntityReference(
         return ResolveResult.EMPTY_ARRAY
     }
 
+    /**
+     * Resolves supported second-level entities (see [HassDataRepository.getKeyValueElementsForDomains] to understand
+     * what that means). See [SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS] for supported domains.
+     */
     private fun handleKeyNameDomain(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
         val service = HassDataRepository.getInstance(module.project)
-        return service.getKeyValueElementsForDomain(module, domainName).filter {
+        return service.getKeyValueElementsForDomains(module, domainName).filter {
             it.keyText == entityName
         }
             .map { result -> PsiElementResolveResult(result) }
@@ -96,6 +100,9 @@ class HassEntityReference(
         return ResolveResult.EMPTY_ARRAY
     }
 
+    /**
+     * Resolves any other entity, taking the user to the remote states (entities) cache file.
+     */
     private fun handleGenericEntity(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
         val service = HassRemoteRepository.getInstance(module.project)
 

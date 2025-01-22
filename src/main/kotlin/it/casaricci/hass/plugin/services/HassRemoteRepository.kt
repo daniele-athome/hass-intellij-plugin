@@ -79,7 +79,7 @@ fun getDomainNameFromActionName(property: JsonProperty): String? {
 }
 
 /**
- * Returns the domain name for the given second level YAML entry (works for e.g. scripts but not automations).
+ * Returns the domain name for the given second-level YAML entry (works for e.g. scripts but not automations).
  *
  * ```json
  * script: // returns "script"
@@ -125,10 +125,10 @@ private val SERVICES_CACHE = Key<CachedValue<Collection<JsonProperty>>>("HASS_SE
 
 private val STATES_CACHES = mutableMapOf<String, Key<CachedValue<Collection<JsonStringLiteral>>>>()
 
-private fun getStatesCacheKey(vararg domainName: String): Key<CachedValue<Collection<JsonStringLiteral>>> {
-    val key = domainName.joinToString("_")
+private fun getStatesCacheKey(vararg domainNames: String): Key<CachedValue<Collection<JsonStringLiteral>>> {
+    val key = domainNames.joinToString("_")
     return STATES_CACHES.getOrPut(key) {
-        Key<CachedValue<Collection<JsonStringLiteral>>>("HASS_${key}_CACHE")
+        Key<CachedValue<Collection<JsonStringLiteral>>>("HASS_${key}_STATES_CACHE")
     }
 }
 

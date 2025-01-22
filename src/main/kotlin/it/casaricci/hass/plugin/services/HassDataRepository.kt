@@ -16,6 +16,7 @@ import com.intellij.psi.search.GlobalSearchScopesCore
 import com.intellij.psi.util.*
 import it.casaricci.hass.plugin.HassKnownDomains
 import it.casaricci.hass.plugin.HassKnownFilenames
+import it.casaricci.hass.plugin.SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS
 import org.jetbrains.yaml.YAMLFileType
 import org.jetbrains.yaml.YAMLUtil
 import org.jetbrains.yaml.psi.YAMLFile
@@ -30,9 +31,10 @@ private val SECRETS_CACHE = Key<CachedValue<Collection<YAMLKeyValue>>>("HASS_SEC
 
 private val DOMAIN_CACHES = mutableMapOf<String, Key<CachedValue<Collection<YAMLKeyValue>>>>()
 
-private fun getCacheKey(domainName: String): Key<CachedValue<Collection<YAMLKeyValue>>> {
-    return DOMAIN_CACHES.getOrPut(domainName) {
-        Key<CachedValue<Collection<YAMLKeyValue>>>("HASS_${domainName}_CACHE")
+private fun getCacheKey(vararg domainNames: String): Key<CachedValue<Collection<YAMLKeyValue>>> {
+    val key = domainNames.joinToString("_")
+    return DOMAIN_CACHES.getOrPut(key) {
+        Key<CachedValue<Collection<YAMLKeyValue>>>("HASS_${key}_2ND_ELEM_KEY_CACHE")
     }
 }
 
@@ -47,7 +49,7 @@ class HassDataRepository(private val project: Project) {
     // TODO lots of duplicated and unefficient code here
 
     /**
-     * Returns a list of all second level key-value elements (under the given first level key)
+     * Returns a list of all second-level key-value elements (under the given first level keys - i.e. entity domain)
      * in all YAML files in the module.
      *
      * ```yaml
@@ -56,21 +58,21 @@ class HassDataRepository(private val project: Project) {
      *      [...]
      *
      * automation:
-     *   - alias: first automation # NOT selected: not a key-value direct descendant
+     *   - alias: first automation  # NOT selected: not a key-value direct descendant
      *     [...]
      *
      * input_text:
-     *   field_test: # selected
+     *   field_test:  # selected
      *     [...]
      * ```
      */
-    fun getKeyValueElementsForDomain(module: Module, domainName: String): Collection<YAMLKeyValue> {
+    fun getKeyValueElementsForDomains(module: Module, vararg domainNames: String): Collection<YAMLKeyValue> {
         return CachedValuesManager.getManager(project).getCachedValue(
             module,
-            getCacheKey(domainName),
+            getCacheKey(*domainNames),
             {
                 CachedValueProvider.Result.create(
-                    getSecondLevelElementsByKeyName(module, domainName),
+                    getSecondLevelElementsByKeyNames(module, *domainNames),
                     PsiModificationTracker.MODIFICATION_COUNT
                 )
             },
@@ -78,16 +80,17 @@ class HassDataRepository(private val project: Project) {
         )
     }
 
-    // TODO surely there is a more efficient way for merging local entities with remote entities
     fun getEntities(module: Module): Collection<PsiElement> {
         return CachedValuesManager.getManager(project).getCachedValue(
             module,
             ENTITIES_CACHE,
             {
+                // surely there is a more efficient way for merging local entities with remote entities
+
                 val remoteService = HassRemoteRepository.getInstance(module.project)
 
-                // TODO we should use local definitions for domains we can handle (groups, input_*, etc.)
-                val localEntities = this.getKeyValueElementsForDomain(module, HassKnownDomains.SCRIPT)
+                val localEntities = this.getKeyValueElementsForDomains(module,
+                    *SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS.toTypedArray())
                 // list of all entity id (to filter out duplicates from remote entities)
                 val allEntityIds = localEntities.map { it.keyText }.toHashSet()
 
@@ -107,15 +110,16 @@ class HassDataRepository(private val project: Project) {
         )
     }
 
-    // TODO surely there is a more efficient way for merging local scripts with remote actions
     fun getActions(module: Module): Collection<PsiNamedElement> {
         return CachedValuesManager.getManager(project).getCachedValue(
             module,
             ACTIONS_CACHE,
             {
+                // surely there is a more efficient way for merging local entities with remote entities
+
                 val remoteService = HassRemoteRepository.getInstance(module.project)
 
-                val localActions = this.getKeyValueElementsForDomain(module, HassKnownDomains.SCRIPT)
+                val localActions = this.getKeyValueElementsForDomains(module, HassKnownDomains.SCRIPT)
                 // list of all script names (to filter out duplicates from remote services)
                 val allScriptNames = localActions.map { it.keyText }.toHashSet()
 
@@ -191,17 +195,19 @@ class HassDataRepository(private val project: Project) {
     }
 
     /**
-     * See [getKeyValueElementsForDomain].
+     * See [getKeyValueElementsForDomains].
      */
-    private fun getSecondLevelElementsByKeyName(module: Module, rootKey: String): Collection<YAMLKeyValue> {
+    private fun getSecondLevelElementsByKeyNames(module: Module, vararg rootKeys: String): Collection<YAMLKeyValue> {
         return buildList {
             for (yamlFile in findAllYamlPsiFiles(module)) {
-                // TODO is there a more efficient way to do this? This seems like an overkill...
-                YAMLUtil.getQualifiedKeyInFile(yamlFile, rootKey)?.let { scriptBlock ->
-                    scriptBlock.childrenOfType<YAMLMapping>().firstOrNull()?.let { scripts ->
-                        addAll(
-                            scripts.keyValues
-                                .filter { script -> script.key != null })
+                rootKeys.forEach { rootKey ->
+                    // TODO is there a more efficient way to do this? This seems like an overkill...
+                    YAMLUtil.getQualifiedKeyInFile(yamlFile, rootKey)?.let { scriptBlock ->
+                        scriptBlock.childrenOfType<YAMLMapping>().firstOrNull()?.let { scripts ->
+                            addAll(
+                                scripts.keyValues
+                                    .filter { script -> script.key != null })
+                        }
                     }
                 }
             }
