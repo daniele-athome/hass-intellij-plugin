@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.io.CountingGZIPInputStream
 import org.apache.commons.io.input.CountingInputStream
 import org.jetbrains.yaml.YAMLFileType
 import org.jetbrains.yaml.psi.YAMLKeyValue
@@ -41,13 +42,16 @@ fun isActionCall(element: YAMLScalar): Boolean {
 
 /**
  * An [InputStream] that updates a [ProgressIndicator] while being read.
+ * To be used with [com.intellij.util.io.HttpRequests], handles also [CountingGZIPInputStream] for compressed streams.
  * I was surprised that the IntelliJ SDK didn't provide such a utility (or at least I didn't find any).
  */
 class ProgressIndicatorInputStream(
-    stream: InputStream?,
+    private val stream: InputStream?,
     private val contentLength: Long,
     private val indicator: ProgressIndicator
 ) : CountingInputStream(stream) {
+
+    private val gzipStream: Boolean = stream is CountingGZIPInputStream
 
     init {
         indicator.checkCanceled()
@@ -55,10 +59,16 @@ class ProgressIndicatorInputStream(
     }
 
     override fun afterRead(n: Int) {
+        val bytesRead = if (gzipStream) {
+            (stream as CountingGZIPInputStream).compressedBytesRead
+        } else {
+            count.toLong()
+        }
         super.afterRead(n)
+
         indicator.checkCanceled()
         if (contentLength > 0) {
-            updateIndicator(indicator, count.toLong(), contentLength)
+            updateIndicator(indicator, bytesRead, contentLength)
         }
     }
 
