@@ -7,8 +7,8 @@ import org.junit.Test
 class MdiIconsRepositoryTest {
 
     companion object {
-        // as of master @ 2025-01-09
-        const val ICONS_COUNT = 7447
+        // as of master @ 2025-01-23
+        const val ICONS_COUNT = 13670
     }
 
     @Test
