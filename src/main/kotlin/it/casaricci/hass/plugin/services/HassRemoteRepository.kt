@@ -240,7 +240,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                         }
                     }
                 } else {
-                    thisLogger().info("Data cache not available (yet?)")
+                    thisLogger().info("Service data cache not available (yet?)")
                     null
                 }
 
@@ -295,7 +295,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                         }
                     }
                 } else {
-                    thisLogger().info("Data cache not available (yet?)")
+                    thisLogger().info("States data cache not available (yet?)")
                     null
                 }
 

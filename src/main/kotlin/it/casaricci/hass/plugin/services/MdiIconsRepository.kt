@@ -29,9 +29,9 @@ object MdiIconsRepository {
         return json.decodeFromStream<List<IconObject>>(dataset).flatMap {
             buildList {
                 add(it.name to it.name)
-                addAll(it.aliases.map({ alias ->
+                addAll(it.aliases.map { alias ->
                     alias to it.name
-                }))
+                })
             }
         }.toMap()
     }
