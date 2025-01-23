@@ -1,35 +1,23 @@
 package it.casaricci.hass.plugin.documentation
 
-import com.intellij.codeInsight.navigation.fileStatusAttributes
-import com.intellij.ide.util.PsiElementListCellRenderer
-import com.intellij.model.Pointer
-import com.intellij.navigation.NavigationItem
-import com.intellij.openapi.util.Iconable
-import com.intellij.openapi.vfs.newvfs.VfsPresentationUtil
-import com.intellij.platform.backend.documentation.DocumentationResult
 import com.intellij.platform.backend.documentation.DocumentationTarget
 import com.intellij.platform.backend.documentation.PsiDocumentationTargetProvider
-import com.intellij.platform.backend.presentation.TargetPresentation
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNamedElement
-import com.intellij.refactoring.suggested.createSmartPointer
-import it.casaricci.hass.plugin.HassKnownDomains
-import org.jetbrains.yaml.YAMLLanguage
-import org.jetbrains.yaml.psi.YAMLKeyValue
 
+// TODO not ready yet, experimental code
 class HassDocumentationProvider : PsiDocumentationTargetProvider {
 
     override fun documentationTarget(element: PsiElement, originalElement: PsiElement?): DocumentationTarget? {
-        if (element.language == YAMLLanguage.INSTANCE &&
+        /*if (element.language == YAMLLanguage.INSTANCE &&
             element.parent.parent is YAMLKeyValue &&
             (element.parent.parent as YAMLKeyValue).keyText == HassKnownDomains.SCRIPT
         ) {
             return HassDocumentationScriptTarget(element, originalElement)
-        }
+        }*/
         return null
     }
 
-    @Suppress("UnstableApiUsage")
+    /*@Suppress("UnstableApiUsage")
     internal class HassDocumentationScriptTarget(val element: PsiElement, private val originalElement: PsiElement?): DocumentationTarget {
 
         override fun createPointer(): Pointer<out DocumentationTarget> {
@@ -52,7 +40,16 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
                     //presentationError(element)
                     element.toString()
                 }
-            val moduleTextWithIcon = PsiElementListCellRenderer.getModuleTextWithIcon(element)
+            val moduleTextWithIcon: TextWithIcon? = let {
+                val factory = ModuleRendererFactory.findInstance(element)
+                if (factory !is PlatformModuleRendererFactory) {
+                    factory.getModuleTextWithIcon(element)
+                }
+                else {
+                    null
+                }
+            }
+
             return TargetPresentation
                 .builder(presentableText)
                 .backgroundColor(file?.let { VfsPresentationUtil.getFileBackgroundColor(project, file) })
@@ -72,6 +69,5 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
             return "<b>HINT</b>"
         }
 
-
-    }
+    }*/
 }
