@@ -13,12 +13,16 @@
     <extensions defaultExtensionNs="com.intellij">
         <psi.referenceContributor language="yaml"
                                   implementation="it.casaricci.hass.plugin.psi.HassReferenceContributor"/>
+
         <completion.contributor language="yaml"
                                 implementationClass="it.casaricci.hass.plugin.completion.HassCompletionContributor"/>
+
         <lang.findUsagesProvider language="yaml"
                                  implementationClass="it.casaricci.hass.plugin.findUsages.HassScriptFindUsagesProvider"
                                  order="before yamlFindUsagesProvider"/>
+
         <lookup.charFilter implementation="it.casaricci.hass.plugin.completion.HassCharFilter"/>
+
         <!-- TODO not ready yet platform.backend.documentation.psiTargetProvider
                 implementation="it.casaricci.hass.plugin.documentation.HassDocumentationProvider"/-->
 
