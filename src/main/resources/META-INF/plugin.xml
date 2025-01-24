@@ -26,8 +26,8 @@
 
         <lookup.charFilter implementation="it.casaricci.hass.plugin.completion.HassCharFilter"/>
 
-        <!-- TODO not ready yet platform.backend.documentation.psiTargetProvider
-                implementation="it.casaricci.hass.plugin.documentation.HassDocumentationProvider"/-->
+        <platform.backend.documentation.psiTargetProvider
+                implementation="it.casaricci.hass.plugin.documentation.HassDocumentationProvider"/>
 
         <projectConfigurable
                 parentId="tools"

@@ -1,24 +1,45 @@
 package it.casaricci.hass.plugin.documentation
 
+import com.intellij.ide.util.ModuleRendererFactory
+import com.intellij.ide.util.PlatformModuleRendererFactory
+import com.intellij.model.Pointer
+import com.intellij.platform.backend.documentation.DocumentationResult
 import com.intellij.platform.backend.documentation.DocumentationTarget
 import com.intellij.platform.backend.documentation.PsiDocumentationTargetProvider
+import com.intellij.platform.backend.presentation.TargetPresentation
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.childrenOfType
+import com.intellij.refactoring.suggested.createSmartPointer
+import com.intellij.util.TextWithIcon
+import it.casaricci.hass.plugin.HassKnownDomains
+import it.casaricci.hass.plugin.entityId
+import it.casaricci.hass.plugin.splitEntityId
+import org.jetbrains.yaml.YAMLLanguage
+import org.jetbrains.yaml.psi.YAMLKeyValue
+import org.jetbrains.yaml.psi.YAMLMapping
+import org.jetbrains.yaml.psi.YAMLScalar
 
 // TODO not ready yet, experimental code
 class HassDocumentationProvider : PsiDocumentationTargetProvider {
 
     override fun documentationTarget(element: PsiElement, originalElement: PsiElement?): DocumentationTarget? {
-        /*if (element.language == YAMLLanguage.INSTANCE &&
+        if (element.language == YAMLLanguage.INSTANCE &&
+            element.parent is YAMLScalar &&
             element.parent.parent is YAMLKeyValue &&
-            (element.parent.parent as YAMLKeyValue).keyText == HassKnownDomains.SCRIPT
+            ((element.parent.parent as YAMLKeyValue).keyText == "action" ||
+                    (element.parent.parent as YAMLKeyValue).keyText == "service") &&
+            splitEntityId(element.text).first == HassKnownDomains.SCRIPT
         ) {
-            return HassDocumentationScriptTarget(element, originalElement)
-        }*/
+            return HassDocumentationScriptTarget(element.parent, originalElement)
+        }
         return null
     }
 
-    /*@Suppress("UnstableApiUsage")
-    internal class HassDocumentationScriptTarget(val element: PsiElement, private val originalElement: PsiElement?): DocumentationTarget {
+    @Suppress("UnstableApiUsage")
+    internal class HassDocumentationScriptTarget(
+        private val element: PsiElement,
+        private val originalElement: PsiElement?
+    ) : DocumentationTarget {
 
         override fun createPointer(): Pointer<out DocumentationTarget> {
             val elementPtr = element.createSmartPointer()
@@ -30,44 +51,45 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
         }
 
         override fun computePresentation(): TargetPresentation {
-            val project = element.project
-            val file = element.containingFile?.virtualFile
-            val itemPresentation = (element as? NavigationItem)?.presentation
-            val presentableText: String = itemPresentation?.presentableText
-                ?: (element as? PsiNamedElement)?.name
-                ?: element.text
-                ?: run {
-                    //presentationError(element)
-                    element.toString()
-                }
             val moduleTextWithIcon: TextWithIcon? = let {
                 val factory = ModuleRendererFactory.findInstance(element)
                 if (factory !is PlatformModuleRendererFactory) {
                     factory.getModuleTextWithIcon(element)
-                }
-                else {
+                } else {
                     null
                 }
             }
 
             return TargetPresentation
-                .builder(presentableText)
-                .backgroundColor(file?.let { VfsPresentationUtil.getFileBackgroundColor(project, file) })
-                .icon(element.getIcon(Iconable.ICON_FLAG_VISIBILITY or Iconable.ICON_FLAG_READ_STATUS))
-                //.presentableTextAttributes(itemPresentation?.getColoredAttributes())
-                //.containerText(itemPresentation?.getContainerText(), file?.let { fileStatusAttributes(project, file) })
-                .containerText("CONTAINER TEXT", file?.let { fileStatusAttributes(project, file) })
+                .builder(element.text)
                 .locationText(moduleTextWithIcon?.text, moduleTextWithIcon?.icon)
                 .presentation()
         }
 
         override fun computeDocumentation(): DocumentationResult? {
-            return DocumentationResult.documentation("<b>TEST</b>")
+            element.reference?.resolve()?.let {
+                val script = it as YAMLKeyValue
+                val description = script.childrenOfType<YAMLMapping>().firstOrNull()
+                    ?.getKeyValueByKey("description")
+                    ?.valueText
+                if (description != null) {
+                    val entityId = entityId(HassKnownDomains.SCRIPT, script.keyText)
+                    return DocumentationResult
+                        .documentation(
+                            "<p><b>$entityId</b></p>" +
+                                    "<p>$description</p>"
+                        )
+                }
+            }
+            return null
         }
 
+        /**
+         * Never called.
+         */
         override fun computeDocumentationHint(): String? {
-            return "<b>HINT</b>"
+            return null
         }
 
-    }*/
+    }
 }
