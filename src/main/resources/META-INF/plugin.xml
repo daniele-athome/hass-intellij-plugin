@@ -21,6 +21,9 @@
                                  implementationClass="it.casaricci.hass.plugin.findUsages.HassScriptFindUsagesProvider"
                                  order="before yamlFindUsagesProvider"/>
         <lang.findUsagesProvider language="yaml"
+                                 implementationClass="it.casaricci.hass.plugin.findUsages.HassAutomationFindUsagesProvider"
+                                 order="before yamlFindUsagesProvider"/>
+        <lang.findUsagesProvider language="yaml"
                                  implementationClass="it.casaricci.hass.plugin.findUsages.HassSecretFindUsagesProvider"
                                  order="before yamlFindUsagesProvider"/>
 
