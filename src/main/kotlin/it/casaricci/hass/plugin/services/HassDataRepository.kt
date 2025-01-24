@@ -14,6 +14,7 @@ import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.GlobalSearchScopesCore
 import com.intellij.psi.util.*
+import it.casaricci.hass.plugin.HASS_AUTOMATION_NAME_PROPERTY
 import it.casaricci.hass.plugin.HassKnownDomains
 import it.casaricci.hass.plugin.HassKnownFilenames
 import it.casaricci.hass.plugin.SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS
@@ -87,8 +88,10 @@ class HassDataRepository(private val project: Project) {
 
                 val remoteService = HassRemoteRepository.getInstance(module.project)
 
-                val localEntities = this.getKeyValueElementsForDomains(module,
-                    *SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS.toTypedArray())
+                val localEntities = this.getKeyValueElementsForDomains(
+                    module,
+                    *SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS.toTypedArray()
+                )
                 // list of all entity id (to filter out duplicates from remote entities)
                 val allEntityIds = localEntities.map { it.keyText }.toHashSet()
 
@@ -151,8 +154,11 @@ class HassDataRepository(private val project: Project) {
                             automationBlock.childrenOfType<YAMLSequence>().firstOrNull()?.let { automations ->
                                 addAll(
                                     automations.items
-                                        .flatMap { automation ->
+                                        .mapNotNull { automation ->
                                             automation.childrenOfType<YAMLMapping>().first().keyValues
+                                                .firstOrNull { automationProperty ->
+                                                    automationProperty.keyText == HASS_AUTOMATION_NAME_PROPERTY
+                                                }
                                         })
                             }
                         }

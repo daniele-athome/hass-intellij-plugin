@@ -62,3 +62,8 @@ const val HASS_TOKEN_SECRET = "!secret"
  * Prefix of all icon names.
  */
 const val ICON_NAME_PREFIX = "mdi:"
+
+/**
+ * Property name used for an automation name.
+ */
+const val HASS_AUTOMATION_NAME_PROPERTY = "alias"
