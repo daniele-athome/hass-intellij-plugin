@@ -31,6 +31,7 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
      * This method is called in various situations and I didn't really knew how to detect each situation but by
      * reverse-engineering the method arguments. The current code seems to handle all (2+1) situations well - for now.
      */
+    // TODO handle quick documentation on script itself
     override fun documentationTarget(element: PsiElement, originalElement: PsiElement?): DocumentationTarget? {
         // we still don't know when originalElement could be null, better safe than sorry
         if (originalElement == null) {
