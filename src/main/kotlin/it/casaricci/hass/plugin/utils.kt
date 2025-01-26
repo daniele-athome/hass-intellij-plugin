@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiElement
 import com.intellij.util.io.CountingGZIPInputStream
 import org.apache.commons.io.input.CountingInputStream
 import org.jetbrains.yaml.YAMLFileType
@@ -17,6 +18,14 @@ import java.io.InputStream
 fun isHassConfigFile(virtualFile: VirtualFile, project: Project): Boolean {
     if (virtualFile.fileType == YAMLFileType.YML) {
         return ModuleUtil.findModuleForFile(virtualFile, project)?.let { isHomeAssistantModule(it) } == true
+    }
+    return false
+}
+
+// TODO this should start from configuration.yaml and walk all includes (in order to filter out unwanted files)
+fun isHassConfigFile(element: PsiElement): Boolean {
+    if (element.containingFile.fileType == YAMLFileType.YML) {
+        return ModuleUtil.findModuleForPsiElement(element)?.let { isHomeAssistantModule(it) } == true
     }
     return false
 }

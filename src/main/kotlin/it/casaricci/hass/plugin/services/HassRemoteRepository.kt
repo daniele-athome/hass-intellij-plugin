@@ -11,6 +11,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModulePointerManager
+import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressIndicatorProvider
 import com.intellij.openapi.progress.coroutineToIndicator
@@ -21,6 +22,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.util.*
 import com.intellij.util.Url
@@ -30,6 +32,7 @@ import com.intellij.util.io.createDirectories
 import it.casaricci.hass.plugin.MyBundle
 import it.casaricci.hass.plugin.ProgressIndicatorInputStream
 import it.casaricci.hass.plugin.getConfiguration
+import it.casaricci.hass.plugin.services.HassRemoteRepository.Companion.getServicesCacheFile
 import it.casaricci.hass.plugin.splitEntityId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -48,11 +51,25 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
 import kotlin.io.path.isReadable
 import kotlin.io.path.isRegularFile
+import kotlin.io.path.pathString
 
 private val CACHE_PATH = PathManager.getSystemDir().resolve("homeassistant")
 
 private const val API_SERVICES_PATH = "api/services"
 private const val API_STATES_PATH = "api/states"
+
+// unused for now
+fun isHassServicesCacheFile(cacheElement: PsiElement, moduleElement: PsiElement?): Boolean {
+    if (moduleElement == null) {
+        return false
+    }
+
+    val module = ModuleUtil.findModuleForPsiElement(moduleElement)
+    if (module != null) {
+        return cacheElement.containingFile.virtualFile.path == getServicesCacheFile(module).pathString
+    }
+    return false
+}
 
 /**
  * Returns the domain name for the given action coming from the JSON returned by /api/services.
@@ -466,18 +483,6 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
         CACHE_PATH.createDirectories()
     }
 
-    private fun getServicesCacheFile(module: Module): Path {
-        val projectName = FileUtil.sanitizeFileName(module.project.locationHash)
-        val moduleName = FileUtil.sanitizeFileName(module.name)
-        return CACHE_PATH.resolve("${projectName}_${moduleName}_services.json")
-    }
-
-    private fun getStatesCacheFile(module: Module): Path {
-        val projectName = FileUtil.sanitizeFileName(module.project.locationHash)
-        val moduleName = FileUtil.sanitizeFileName(module.name)
-        return CACHE_PATH.resolve("${projectName}_${moduleName}_states.json")
-    }
-
     private fun buildServicesUrl(instanceUrl: String): Url? {
         return Urls.parse(instanceUrl, false)?.resolve(API_SERVICES_PATH)
     }
@@ -487,6 +492,19 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
     }
 
     companion object {
+
+        internal fun getServicesCacheFile(module: Module): Path {
+            val projectName = FileUtil.sanitizeFileName(module.project.locationHash)
+            val moduleName = FileUtil.sanitizeFileName(module.name)
+            return CACHE_PATH.resolve("${projectName}_${moduleName}_services.json")
+        }
+
+        internal fun getStatesCacheFile(module: Module): Path {
+            val projectName = FileUtil.sanitizeFileName(module.project.locationHash)
+            val moduleName = FileUtil.sanitizeFileName(module.name)
+            return CACHE_PATH.resolve("${projectName}_${moduleName}_states.json")
+        }
+
         @JvmStatic
         fun getInstance(project: Project): HassRemoteRepository {
             return project.getService(HassRemoteRepository::class.java)
