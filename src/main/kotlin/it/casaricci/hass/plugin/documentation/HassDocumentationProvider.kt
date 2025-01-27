@@ -14,10 +14,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.childrenOfType
 import com.intellij.refactoring.suggested.createSmartPointer
 import com.intellij.util.TextWithIcon
-import it.casaricci.hass.plugin.HassKnownDomains
-import it.casaricci.hass.plugin.entityId
-import it.casaricci.hass.plugin.isActionCall
-import it.casaricci.hass.plugin.isHassConfigFile
+import it.casaricci.hass.plugin.*
 import it.casaricci.hass.plugin.services.getDomainNameFromActionName
 import org.jetbrains.yaml.psi.YAMLKeyValue
 import org.jetbrains.yaml.psi.YAMLMapping
@@ -29,9 +26,8 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
     /**
      * This part of the API is not really well documented yet - I guess because it's relatively new.
      * This method is called in various situations and I didn't really knew how to detect each situation but by
-     * reverse-engineering the method arguments. The current code seems to handle all (2+1) situations well - for now.
+     * reverse-engineering the method arguments. The current code seems to handle all (3+1) situations well - for now.
      */
-    // TODO handle quick documentation on script itself
     override fun documentationTarget(element: PsiElement, originalElement: PsiElement?): DocumentationTarget? {
         // we still don't know when originalElement could be null, better safe than sorry
         if (originalElement == null) {
@@ -41,7 +37,8 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
         // documentation request coming from a Home Assistant YAML file
         if (isHassConfigFile(originalElement)) {
             // documentation request coming from an action call
-            if (originalElement.parent is YAMLScalar && isActionCall(originalElement.parent as YAMLScalar)) {
+            if ((originalElement.parent is YAMLScalar && isActionCall(originalElement.parent as YAMLScalar) ||
+                        isScriptDefinition(originalElement.parent))) {
                 val resolveReference: Boolean
 
                 // documentation request from a code completion popup
@@ -52,6 +49,11 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
                 // documentation request directly to the action call
                 else if (element.parent is YAMLScalar) {
                     resolveReference = true
+                    element.parent
+                }
+                // documentation request on the entity definition
+                else if (element.parent is YAMLKeyValue) {
+                    resolveReference = false
                     element.parent
                 }
                 // unhandled case?

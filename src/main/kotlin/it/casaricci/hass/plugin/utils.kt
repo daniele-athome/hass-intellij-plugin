@@ -49,6 +49,12 @@ fun isActionCall(element: YAMLScalar): Boolean {
                     (element.parent as YAMLKeyValue).keyText == "service")
 }
 
+fun isScriptDefinition(element: PsiElement): Boolean {
+    return element is YAMLKeyValue &&
+            element.parentMapping?.parent is YAMLKeyValue &&
+            (element.parentMapping?.parent as YAMLKeyValue).keyText == HassKnownDomains.SCRIPT
+}
+
 /**
  * An [InputStream] that updates a [ProgressIndicator] while being read.
  * To be used with [com.intellij.util.io.HttpRequests], handles also [CountingGZIPInputStream] for compressed streams.

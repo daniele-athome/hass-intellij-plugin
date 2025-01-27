@@ -5,6 +5,7 @@ import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.psi.PsiElement
 import it.casaricci.hass.plugin.HassKnownDomains
 import it.casaricci.hass.plugin.MyBundle
+import it.casaricci.hass.plugin.isScriptDefinition
 import org.jetbrains.yaml.YAMLWordsScanner
 import org.jetbrains.yaml.psi.YAMLKeyValue
 
@@ -43,7 +44,5 @@ class HassScriptFindUsagesProvider : FindUsagesProvider {
         return ""
     }
 
-    private fun isMyElement(element: PsiElement): Boolean = element is YAMLKeyValue &&
-            element.parent.parent is YAMLKeyValue &&
-            (element.parent.parent as YAMLKeyValue).keyText == HassKnownDomains.SCRIPT
+    private fun isMyElement(element: PsiElement): Boolean = isScriptDefinition(element)
 }
