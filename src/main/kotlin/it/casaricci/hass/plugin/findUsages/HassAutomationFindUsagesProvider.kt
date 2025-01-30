@@ -1,13 +1,18 @@
 package it.casaricci.hass.plugin.findUsages
 
+import com.intellij.lang.cacheBuilder.DefaultWordsScanner
 import com.intellij.lang.cacheBuilder.WordsScanner
 import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.psi.PsiElement
+import com.intellij.psi.tree.IElementType
+import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.parentOfType
 import it.casaricci.hass.plugin.HassKnownDomains
 import it.casaricci.hass.plugin.MyBundle
-import org.jetbrains.yaml.YAMLWordsScanner
+import org.jetbrains.yaml.YAMLElementTypes
+import org.jetbrains.yaml.YAMLTokenTypes
+import org.jetbrains.yaml.lexer.YAMLFlexLexer
 import org.jetbrains.yaml.psi.YAMLKeyValue
 import org.jetbrains.yaml.psi.YAMLSequence
 import org.jetbrains.yaml.psi.YAMLSequenceItem
@@ -15,7 +20,17 @@ import org.jetbrains.yaml.psi.YAMLSequenceItem
 class HassAutomationFindUsagesProvider : FindUsagesProvider {
 
     override fun getWordsScanner(): WordsScanner {
-        return YAMLWordsScanner()
+        return DefaultWordsScanner(
+            YAMLFlexLexer(),
+            TokenSet.create(
+                YAMLTokenTypes.SCALAR_KEY,
+                YAMLTokenTypes.SCALAR_TEXT,
+                YAMLTokenTypes.TEXT,
+            ),
+            TokenSet.create(
+                YAMLTokenTypes.COMMENT
+            ),
+            YAMLElementTypes.SCALAR_VALUES)
     }
 
     override fun canFindUsagesFor(element: PsiElement): Boolean {
