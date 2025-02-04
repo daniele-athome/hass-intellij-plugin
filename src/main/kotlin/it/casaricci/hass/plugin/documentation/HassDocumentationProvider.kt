@@ -11,8 +11,8 @@ import com.intellij.platform.backend.documentation.DocumentationTarget
 import com.intellij.platform.backend.documentation.PsiDocumentationTargetProvider
 import com.intellij.platform.backend.presentation.TargetPresentation
 import com.intellij.psi.PsiElement
+import com.intellij.psi.SmartPointerManager
 import com.intellij.psi.util.childrenOfType
-import com.intellij.refactoring.suggested.createSmartPointer
 import com.intellij.util.TextWithIcon
 import it.casaricci.hass.plugin.*
 import it.casaricci.hass.plugin.services.getDomainNameFromActionName
@@ -38,7 +38,8 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
         if (isHassConfigFile(originalElement)) {
             // documentation request coming from an action call
             if ((originalElement.parent is YAMLScalar && isActionCall(originalElement.parent as YAMLScalar) ||
-                        isScriptDefinition(originalElement.parent))) {
+                        isScriptDefinition(originalElement.parent))
+            ) {
                 val resolveReference: Boolean
 
                 // documentation request from a code completion popup
@@ -79,8 +80,10 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
     ) : DocumentationTarget {
 
         override fun createPointer(): Pointer<out DocumentationTarget> {
-            val elementPtr = element.createSmartPointer()
-            val originalElementPtr = originalElement?.createSmartPointer()
+            // cannot use createSmartPointer extension because it was added in a later version of the platform SDK
+            val elementPtr = SmartPointerManager.getInstance(element.project).createSmartPsiElementPointer(element)
+            val originalElementPtr =
+                originalElement?.let { SmartPointerManager.getInstance(it.project).createSmartPsiElementPointer(it) }
             return Pointer {
                 val element = elementPtr.dereference() ?: return@Pointer null
                 HassDocumentationActionTarget(element, originalElementPtr?.dereference(), resolveReference)
