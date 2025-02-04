@@ -4,8 +4,8 @@
 
 **This is a work in progress and ~~will~~ may eat all your files.**
 
-* this is a proof-of-concept for a plugin for working with Home Assistant configuration files with IntelliJ IDEs
-* the code has not been tested yet
+* this is a plugin for working with Home Assistant configuration files with IntelliJ IDEs
+* the code has not been thoroughly tested yet and there are currently near to zero automated tests
 * the code still has leftovers from the template project
 * there are still some performance issues
 * I don't really know what I'm doing since this is my first IntelliJ plugin
@@ -15,15 +15,16 @@
 <!-- Plugin description -->
 Support for [Home Assistant](https://www.home-assistant.io/) configuration files.
 
-* Bundled YAML schema from [Visual Studio Code Extension](https://github.com/keesschollaart81/vscode-home-assistant/)
+* Bundled YAML schema from the awesome [Visual Studio Code Extension](https://github.com/keesschollaart81/vscode-home-assistant/)
 * Go to definition of any locally defined script, automation, input_*, group, shell_command
-* Find usages of any script
+* Find usages of any of the above
 * Access remote Home Assistant data about available services (actions) and entities and use it to resolve any other reference
-* Action call completion
-* Entity completion
+* Action call completion (only in `action:` and `service:` contexts)
+* Entity completion (only in `entity_id:` contexts)
 * Secret completion
 * Go to secret value
-* Dedicated module facet, supporting multiple Home Assistant configurations in the same project
+* Dedicated module facet, supporting multiple Home Assistant configurations in the same project (only for IDEA)
+* Provide documentation hints for supported elements (experimental)
 * [Material Design Icons](https://materialdesignicons.com/) completion
 
 <!-- Plugin description end -->
