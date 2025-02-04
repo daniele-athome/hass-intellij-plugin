@@ -2,7 +2,6 @@ package it.casaricci.hass.plugin.findUsages
 
 import com.intellij.lang.cacheBuilder.WordsScanner
 import com.intellij.lang.findUsages.FindUsagesProvider
-import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import it.casaricci.hass.plugin.MyBundle
@@ -16,7 +15,6 @@ class HassAutomationFindUsagesProvider : FindUsagesProvider {
     }
 
     override fun canFindUsagesFor(element: PsiElement): Boolean {
-        thisLogger().trace("canFindUsageFor: $element/" + element::class.simpleName)
         return isMyElement(element)
     }
 
@@ -44,12 +42,5 @@ class HassAutomationFindUsagesProvider : FindUsagesProvider {
 
     private fun isMyElement(element: PsiElement): Boolean {
         return element is HassAutomation
-        /* TODO I believe above statement is enough -- if (element is YAMLMapping) {
-            return element.parentOfType<YAMLSequenceItem>()
-                ?.parentOfType<YAMLSequence>()
-                ?.parentOfType<YAMLKeyValue>()?.keyText == HassKnownDomains.AUTOMATION
-            }
-            return false
-         */
     }
 }

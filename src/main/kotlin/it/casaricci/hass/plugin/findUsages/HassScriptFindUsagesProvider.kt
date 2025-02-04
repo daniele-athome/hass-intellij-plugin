@@ -3,11 +3,9 @@ package it.casaricci.hass.plugin.findUsages
 import com.intellij.lang.cacheBuilder.WordsScanner
 import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.psi.PsiElement
-import it.casaricci.hass.plugin.HassKnownDomains
 import it.casaricci.hass.plugin.MyBundle
 import it.casaricci.hass.plugin.isScriptDefinition
 import org.jetbrains.yaml.YAMLWordsScanner
-import org.jetbrains.yaml.psi.YAMLKeyValue
 
 class HassScriptFindUsagesProvider : FindUsagesProvider {
 
@@ -30,19 +28,25 @@ class HassScriptFindUsagesProvider : FindUsagesProvider {
         return ""
     }
 
-    // FIXME this is not used I think because element is never wrapped
+    /**
+     * Called but return value is not used probably because YAML plugin takes precedence.
+     */
     override fun getDescriptiveName(element: PsiElement): String {
-        if (isMyElement(element)) {
+        // since this is not used (for now), avoid losing time doing useless stuff
+        /*if (isMyElement(element)) {
             return element.text
-        }
+        }*/
         return ""
     }
 
-    // FIXME this is not used I think because element is never wrapped
+    /**
+     * Actually never called because YAML plugin takes precedence.
+     */
     override fun getNodeText(element: PsiElement, useFullName: Boolean): String {
-        if (isMyElement(element)) {
+        // since this is not used (for now), avoid losing time doing useless stuff
+        /*if (isMyElement(element)) {
             return element.text + ":"
-        }
+        }*/
         return ""
     }
 
