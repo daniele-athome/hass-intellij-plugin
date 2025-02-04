@@ -7,6 +7,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.jetbrains.jsonSchema.extension.JsonSchemaFileProvider
 import com.jetbrains.jsonSchema.extension.JsonSchemaProviderFactory
 import com.jetbrains.jsonSchema.extension.SchemaType
+import com.jetbrains.jsonSchema.impl.JsonSchemaVersion
 import it.casaricci.hass.plugin.MyBundle
 import it.casaricci.hass.plugin.isHassConfigFile
 import org.jetbrains.annotations.Nls
@@ -28,5 +29,7 @@ class HassJsonSchemaProviderFactory : JsonSchemaProviderFactory, DumbAware {
             javaClass.getResource(HASS_SCHEMA_PATH)?.let(VfsUtil::findFileByURL)
 
         override fun getSchemaType(): SchemaType = SchemaType.embeddedSchema
+
+        override fun getSchemaVersion(): JsonSchemaVersion = JsonSchemaVersion.SCHEMA_7
     }
 }
