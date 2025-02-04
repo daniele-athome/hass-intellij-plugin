@@ -11,7 +11,7 @@ import org.jetbrains.yaml.psi.YAMLScalar
 import org.jetbrains.yaml.psi.impl.YAMLKeyValueImpl
 
 /**
- * Wraps the "alias" key value element of an automation, giving the element [PsiNamedElement] title.
+ * Wraps the "alias" key value element of an automation, giving the element [PsiNamedElement] features.
  */
 class HassAutomation(private val element: YAMLScalar) : PsiNamedElement, YAMLScalar by element {
 

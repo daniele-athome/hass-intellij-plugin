@@ -84,9 +84,9 @@ class HassEntityReference(
     private fun handleAutomation(module: Module, entityName: String): Array<ResolveResult> {
         val service = HassDataRepository.getInstance(module.project)
         return service.getAutomations(module).filter {
-            it.valueText == entityName
+            it.textValue == entityName
         }
-            .mapNotNull { result -> result.value?.let { PsiElementResolveResult(it) } }
+            .map { result -> PsiElementResolveResult(result) }
             .toTypedArray()
     }
 

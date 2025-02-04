@@ -7,11 +7,14 @@ import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.parentOfType
 import com.intellij.util.io.CountingGZIPInputStream
 import org.apache.commons.io.input.CountingInputStream
 import org.jetbrains.yaml.YAMLFileType
 import org.jetbrains.yaml.psi.YAMLKeyValue
 import org.jetbrains.yaml.psi.YAMLScalar
+import org.jetbrains.yaml.psi.YAMLSequence
+import org.jetbrains.yaml.psi.YAMLSequenceItem
 import java.io.InputStream
 
 // TODO this should start from configuration.yaml and walk all includes (in order to filter out unwanted files)
@@ -53,6 +56,18 @@ fun isScriptDefinition(element: PsiElement): Boolean {
     return element is YAMLKeyValue &&
             element.parentMapping?.parent is YAMLKeyValue &&
             (element.parentMapping?.parent as YAMLKeyValue).keyText == HassKnownDomains.SCRIPT
+}
+
+fun isAutomation(element: PsiElement?): Boolean {
+    if (element is YAMLScalar) {
+        val keyValue = element.parentOfType<YAMLKeyValue>()
+        return (keyValue?.keyText == HASS_AUTOMATION_NAME_PROPERTY &&
+            keyValue.parentOfType<YAMLSequenceItem>()
+                ?.parentOfType<YAMLSequence>()
+                ?.parentOfType<YAMLKeyValue>()?.keyText == HassKnownDomains.AUTOMATION
+        )
+    }
+    return false
 }
 
 /**

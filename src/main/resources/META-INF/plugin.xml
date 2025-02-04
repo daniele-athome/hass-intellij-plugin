@@ -15,7 +15,7 @@
                                   implementation="it.casaricci.hass.plugin.psi.HassReferenceContributor"/>
 
         <targetElementEvaluator language="yaml"
-                                implementationClass="it.casaricci.hass.plugin.psi.HassElementEvaluator"/>
+                                implementationClass="it.casaricci.hass.plugin.language.HassElementEvaluator"/>
 
         <completion.contributor language="yaml"
                                 implementationClass="it.casaricci.hass.plugin.completion.HassCompletionContributor"/>
