@@ -30,6 +30,7 @@ class HassScriptFindUsagesProvider : FindUsagesProvider {
         return ""
     }
 
+    // FIXME this is not used I think because element is never wrapped
     override fun getDescriptiveName(element: PsiElement): String {
         if (isMyElement(element)) {
             return element.text
@@ -37,6 +38,7 @@ class HassScriptFindUsagesProvider : FindUsagesProvider {
         return ""
     }
 
+    // FIXME this is not used I think because element is never wrapped
     override fun getNodeText(element: PsiElement, useFullName: Boolean): String {
         if (isMyElement(element)) {
             return element.text + ":"
