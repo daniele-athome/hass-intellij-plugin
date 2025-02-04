@@ -13,6 +13,7 @@ import org.jetbrains.yaml.psi.impl.YAMLKeyValueImpl
 /**
  * Wraps the "alias" key value element of an automation, giving the element [PsiNamedElement] features.
  */
+// FIXME "Jump to source" doesn't work with this element for some reason
 class HassAutomation(private val element: YAMLScalar) : PsiNamedElement, YAMLScalar by element {
 
     /**
