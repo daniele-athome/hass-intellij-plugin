@@ -77,10 +77,14 @@ class HassEntityReference(
             .toTypedArray()
     }
 
+    /**
+     * Automations are identified by the value of their "alias" key. The actual PSI element is wrapped by
+     * [it.casaricci.hass.plugin.language.HassAutomation].
+     */
     private fun handleAutomation(module: Module, entityName: String): Array<ResolveResult> {
         val service = HassDataRepository.getInstance(module.project)
         return service.getAutomations(module).filter {
-            it.valueText == entityName
+            it.textValue == entityName
         }
             .map { result -> PsiElementResolveResult(result) }
             .toTypedArray()

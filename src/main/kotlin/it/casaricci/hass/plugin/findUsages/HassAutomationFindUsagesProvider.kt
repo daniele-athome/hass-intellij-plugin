@@ -3,11 +3,12 @@ package it.casaricci.hass.plugin.findUsages
 import com.intellij.lang.cacheBuilder.WordsScanner
 import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNamedElement
 import it.casaricci.hass.plugin.MyBundle
-import it.casaricci.hass.plugin.isScriptDefinition
+import it.casaricci.hass.plugin.language.HassAutomation
 import org.jetbrains.yaml.YAMLWordsScanner
 
-class HassScriptFindUsagesProvider : FindUsagesProvider {
+class HassAutomationFindUsagesProvider : FindUsagesProvider {
 
     override fun getWordsScanner(): WordsScanner {
         return YAMLWordsScanner()
@@ -23,32 +24,23 @@ class HassScriptFindUsagesProvider : FindUsagesProvider {
 
     override fun getType(element: PsiElement): String {
         if (isMyElement(element)) {
-            return MyBundle.message("hass.findUsages.haScript")
+            return MyBundle.message("hass.findUsages.haAutomation")
         }
         return ""
     }
 
-    /**
-     * Called but return value is not used probably because YAML plugin takes precedence.
-     */
     override fun getDescriptiveName(element: PsiElement): String {
-        // since this is not used (for now), avoid losing time doing useless stuff
-        /*if (isMyElement(element)) {
-            return element.text
-        }*/
+        if (isMyElement(element)) {
+            return (element as PsiNamedElement).name ?: ""
+        }
         return ""
     }
 
-    /**
-     * Actually never called because YAML plugin takes precedence.
-     */
     override fun getNodeText(element: PsiElement, useFullName: Boolean): String {
-        // since this is not used (for now), avoid losing time doing useless stuff
-        /*if (isMyElement(element)) {
-            return element.text + ":"
-        }*/
-        return ""
+        return getDescriptiveName(element)
     }
 
-    private fun isMyElement(element: PsiElement): Boolean = isScriptDefinition(element)
+    private fun isMyElement(element: PsiElement): Boolean {
+        return element is HassAutomation
+    }
 }

@@ -23,9 +23,10 @@ import org.jetbrains.yaml.YAMLUtil
 import org.jetbrains.yaml.psi.YAMLFile
 import org.jetbrains.yaml.psi.YAMLKeyValue
 import org.jetbrains.yaml.psi.YAMLMapping
+import org.jetbrains.yaml.psi.YAMLScalar
 import org.jetbrains.yaml.psi.YAMLSequence
 
-private val AUTOMATIONS_CACHE = Key<CachedValue<Collection<YAMLKeyValue>>>("HASS_AUTOMATIONS_CACHE")
+private val AUTOMATIONS_CACHE = Key<CachedValue<Collection<YAMLScalar>>>("HASS_AUTOMATIONS_CACHE")
 private val ACTIONS_CACHE = Key<CachedValue<Collection<PsiNamedElement>>>("HASS_ACTIONS_CACHE")
 private val ENTITIES_CACHE = Key<CachedValue<Collection<PsiElement>>>("HASS_ENTITIES_CACHE")
 private val SECRETS_CACHE = Key<CachedValue<Collection<YAMLKeyValue>>>("HASS_SECRETS_CACHE")
@@ -142,7 +143,7 @@ class HassDataRepository(private val project: Project) {
     /**
      * List of all automations. Uses local data only.
      */
-    fun getAutomations(module: Module): Collection<YAMLKeyValue> {
+    fun getAutomations(module: Module): Collection<YAMLScalar> {
         return CachedValuesManager.getManager(project).getCachedValue(
             module,
             AUTOMATIONS_CACHE,
@@ -150,6 +151,7 @@ class HassDataRepository(private val project: Project) {
                 CachedValueProvider.Result.create(buildList {
                     for (yamlFile in findAllYamlPsiFiles(module)) {
                         // TODO is there a more efficient way to do this? This seems like an overkill...
+                        // TODO this logic should be centralized somewhere maybe?
                         YAMLUtil.getQualifiedKeyInFile(yamlFile, HassKnownDomains.AUTOMATION)?.let { automationBlock ->
                             automationBlock.childrenOfType<YAMLSequence>().firstOrNull()?.let { automations ->
                                 addAll(
@@ -158,7 +160,7 @@ class HassDataRepository(private val project: Project) {
                                             automation.childrenOfType<YAMLMapping>().first().keyValues
                                                 .firstOrNull { automationProperty ->
                                                     automationProperty.keyText == HASS_AUTOMATION_NAME_PROPERTY
-                                                }
+                                                }?.value as? YAMLScalar
                                         })
                             }
                         }
