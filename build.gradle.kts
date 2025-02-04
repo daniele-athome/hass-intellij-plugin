@@ -91,8 +91,14 @@ intellijPlatform {
     }
 
     signing {
-        certificateChain = providers.environmentVariable("CERTIFICATE_CHAIN")
-        privateKey = providers.environmentVariable("PRIVATE_KEY")
+        if (providers.environmentVariable("CERTIFICATE_CHAIN_FILE").isPresent) {
+            certificateChainFile.set(file(providers.environmentVariable("CERTIFICATE_CHAIN_FILE")))
+            privateKeyFile.set(file(providers.environmentVariable("PRIVATE_KEY_FILE")))
+        }
+        else {
+            certificateChain = providers.environmentVariable("CERTIFICATE_CHAIN")
+            privateKey = providers.environmentVariable("PRIVATE_KEY")
+        }
         password = providers.environmentVariable("PRIVATE_KEY_PASSWORD")
     }
 
