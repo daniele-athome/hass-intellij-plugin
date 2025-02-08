@@ -29,6 +29,54 @@ Support for [Home Assistant](https://www.home-assistant.io/) configuration files
 
 <!-- Plugin description end -->
 
+## Notice
+
+Home Assistant configuration layout can vary widely among users, however for performance reasons (and for the sake of
+my sanity), some use-cases are not supported:
+
+#### Code insights driven by includes
+
+I might implement this one day, but the issue is that you can include YAML code into other YAML code in multiple ways:
+`!include` et al., YAML anchors, `lovelace_gen`, some other unknown custom integration... so the plugin will just
+consider all YAML files in the module as Home Assistant configuration files.
+
+#### Integrations not as top-level YAML keys
+
+Because of includes (see above), you could write something like this:
+
+```yaml
+# in configuration.yml
+script: !include scripts.yml
+```
+
+```yaml
+# in scripts.yml
+script_name:
+  sequence:
+    [...]
+```
+
+Because there are some many ways one could do this kind of stuff, this is not supported (and probably will never be).
+The only supported way is to always have the integration at top-level and use
+[packages](https://www.home-assistant.io/docs/configuration/packages/).
+
+```yaml
+# in configuration.yml
+homeassistant:
+  # you can use whatever packages notation, the important thing is that
+  # every YAML file has integrations at top-level.
+  packages: !include_dir_named packages
+```
+
+```yaml
+# in packages/scripts.yml
+# every YAML file has integrations (in this case "script") at top-level.
+script:
+  script_name:
+    sequence:
+            [...]
+```
+
 > [!NOTE]
 > README from the [plugin template](https://github.com/JetBrains/intellij-platform-plugin-template/) follows.
 > I'll delete it when I feel comfortable enough.
