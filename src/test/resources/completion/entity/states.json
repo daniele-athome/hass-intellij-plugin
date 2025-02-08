@@ -1,0 +1,23 @@
+[
+  {
+    "entity_id": "scene.house_entrance",
+    "state": "2025-01-15T18:09:37.483591+00:00",
+    "attributes": {
+      "entity_id": [
+        "light.living_ceiling",
+        "light.living_stand",
+        "light.living_main",
+        "input_boolean.house_entrance_lights"
+      ],
+      "friendly_name": "house_entrance"
+    },
+    "last_changed": "2025-01-15T18:09:37.483638+00:00",
+    "last_reported": "2025-01-15T18:09:37.483638+00:00",
+    "last_updated": "2025-01-15T18:09:37.483638+00:00",
+    "context": {
+      "id": "01JHNJG65V7YKPVPFNPGY61FJA",
+      "parent_id": "01JHNJG65VWQHRE2DZBPANA6SP",
+      "user_id": null
+    }
+  }
+]

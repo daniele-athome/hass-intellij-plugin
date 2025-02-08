@@ -1,0 +1,8 @@
+script:
+  do_some_action:
+    sequence:
+      - action: notify.test
+
+  do_some_other_action:
+    sequence:
+      - action: notify.test
