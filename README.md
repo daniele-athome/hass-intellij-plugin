@@ -32,7 +32,7 @@ Support for [Home Assistant](https://www.home-assistant.io/) configuration files
 ## Notice
 
 Home Assistant configuration layout can vary widely among users, however for performance reasons (and for the sake of
-my sanity), some use-cases are not supported:
+my sanity), some use cases are not supported:
 
 #### Code insights driven by includes
 
