@@ -97,7 +97,7 @@ class HassDataRepository(private val project: Project) {
                 val allEntityIds = localEntities.map { it.keyText }.toHashSet()
 
                 val remoteEntities =
-                    remoteService.getStates(module, HassKnownDomains.SCRIPT)?.filter { action ->
+                    remoteService.getStates(module)?.filter { action ->
                         !allEntityIds.contains(action.name)
                     }
 
