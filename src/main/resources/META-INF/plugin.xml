@@ -11,6 +11,8 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="it.casaricci.hass.plugin.services.HassRemoteRepository"/>
+
         <psi.referenceContributor language="yaml"
                                   implementation="it.casaricci.hass.plugin.psi.HassReferenceContributor"/>
 

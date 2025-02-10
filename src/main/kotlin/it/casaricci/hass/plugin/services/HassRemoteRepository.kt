@@ -7,7 +7,6 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.application.ReadAction
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModulePointerManager
@@ -155,8 +154,7 @@ private fun getStatesCacheKey(vararg domainNames: String): Key<CachedValue<Colle
 /**
  * Service used for caching data from Home Assistant instance (services, entities, etc.).
  */
-@Service(Service.Level.PROJECT)
-class HassRemoteRepository(private val project: Project, private val cs: CoroutineScope) {
+open class HassRemoteRepository(private val project: Project, private val cs: CoroutineScope) {
 
     @OptIn(ExperimentalSerializationApi::class)
     private val jsonFormatter = Json {
@@ -216,13 +214,13 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
     /**
      * Tries to read from cache or locally downloaded JSON file all services.
      */
-    fun getServices(module: Module): Collection<JsonProperty>? {
+    open fun getServices(module: Module): Collection<JsonProperty>? {
         return CachedValuesManager.getManager(project).getCachedValue(
             module,
             SERVICES_CACHE,
             {
-                val result: List<JsonProperty>? = if (isServicesCacheAvailable(module)) {
-                    ReadAction.compute<List<JsonProperty>, Throwable> {
+                val result: Collection<JsonProperty>? = if (isServicesCacheAvailable(module)) {
+                    ReadAction.compute<Collection<JsonProperty>, Throwable> {
                         try {
                             val virtualFile = LocalFileSystem.getInstance()
                                 .findFileByNioFile(getServicesCacheFile(module))
@@ -233,16 +231,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                 throw IOException("Corrupted or unparseable cache file")
                             }
 
-                            (psiFile.topLevelValue as JsonArray).valueList.filter {
-                                if (it is JsonObject) {
-                                    val domainNameElement = it.findProperty("domain")?.value
-                                    domainNameElement is JsonStringLiteral
-                                } else false
-                            }
-                                .flatMap {
-                                    val domainObject = it as JsonObject
-                                    (domainObject.findProperty("services")?.value as JsonObject).propertyList
-                                }
+                            getServices(psiFile)
 
                         } catch (e: ProcessCanceledException) {
                             // canceled
@@ -267,13 +256,26 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
         )
     }
 
-    fun getStates(module: Module, vararg excludeDomains: String): Collection<JsonStringLiteral>? {
+    protected fun getServices(psiFile: JsonFile): Collection<JsonProperty> {
+        return (psiFile.topLevelValue as JsonArray).valueList.filter {
+            if (it is JsonObject) {
+                val domainNameElement = it.findProperty("domain")?.value
+                domainNameElement is JsonStringLiteral
+            } else false
+        }
+            .flatMap {
+                val domainObject = it as JsonObject
+                (domainObject.findProperty("services")?.value as JsonObject).propertyList
+            }
+    }
+
+    open fun getStates(module: Module, vararg excludeDomains: String): Collection<JsonStringLiteral>? {
         return CachedValuesManager.getManager(project).getCachedValue(
             module,
             getStatesCacheKey(*excludeDomains),
             {
-                val result: List<JsonStringLiteral>? = if (isStatesCacheAvailable(module)) {
-                    ReadAction.compute<List<JsonStringLiteral>, Throwable> {
+                val result: Collection<JsonStringLiteral>? = if (isStatesCacheAvailable(module)) {
+                    ReadAction.compute<Collection<JsonStringLiteral>, Throwable> {
                         try {
                             val virtualFile = LocalFileSystem.getInstance()
                                 .findFileByNioFile(getStatesCacheFile(module))
@@ -284,20 +286,7 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
                                 throw IOException("Corrupted or unparseable cache file")
                             }
 
-                            (psiFile.topLevelValue as JsonArray).valueList.filter {
-                                if (it is JsonObject) {
-                                    val entityIdElement = it.findProperty("entity_id")?.value
-                                    if (entityIdElement is JsonStringLiteral) {
-                                        val (domainName, _) = splitEntityId(entityIdElement.value)
-                                        !excludeDomains.contains(domainName)
-                                    } else false
-                                } else false
-                            }
-                                .map {
-                                    // null checks were already done during filtering
-                                    val entityObject = it as JsonObject
-                                    entityObject.findProperty("entity_id")?.value as JsonStringLiteral
-                                }
+                            getStates(psiFile, *excludeDomains)
 
                         } catch (e: ProcessCanceledException) {
                             // canceled
@@ -320,6 +309,23 @@ class HassRemoteRepository(private val project: Project, private val cs: Corouti
             },
             false
         )
+    }
+
+    protected fun getStates(psiFile: JsonFile, vararg excludeDomains: String): Collection<JsonStringLiteral> {
+        return (psiFile.topLevelValue as JsonArray).valueList.filter {
+            if (it is JsonObject) {
+                val entityIdElement = it.findProperty("entity_id")?.value
+                if (entityIdElement is JsonStringLiteral) {
+                    val (domainName, _) = splitEntityId(entityIdElement.value)
+                    !excludeDomains.contains(domainName)
+                } else false
+            } else false
+        }
+            .map {
+                // null checks were already done during filtering
+                val entityObject = it as JsonObject
+                entityObject.findProperty("entity_id")?.value as JsonStringLiteral
+            }
     }
 
     /**
