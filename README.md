@@ -4,9 +4,9 @@
 
 **This is a work in progress and ~~will~~ may eat all your files.**
 
-* this is a plugin for working with Home Assistant configuration files with IntelliJ IDEs
-* the code has not been thoroughly tested yet and there are currently near to zero automated tests
-* the code still has leftovers from the template project
+* this is a plugin for working with Home Assistant configuration files in IntelliJ IDEs
+* the code has not been thoroughly tested yet, and there are currently very few automated tests
+* the code still contains leftovers from the template project
 * there are still some performance issues
 * I don't really know what I'm doing since this is my first IntelliJ plugin
 
@@ -16,9 +16,9 @@
 Support for [Home Assistant](https://www.home-assistant.io/) configuration files.
 
 * Bundled YAML schema from the awesome [Visual Studio Code Extension](https://github.com/keesschollaart81/vscode-home-assistant/)
-* Go to definition of any locally defined script, automation, input_*, group, shell_command
+* Go to definition for any locally defined script, automation, `input_*`, group, or `shell_command`
 * Find usages of any of the above
-* Access remote Home Assistant data about available services (actions) and entities and use it to resolve any other reference
+* Access remote Home Assistant data about available services (actions) and entities to resolve references
 * Action call completion (only in `action:` and `service:` contexts)
 * Entity completion (only in `entity_id:` contexts)
 * Secret completion
@@ -31,18 +31,18 @@ Support for [Home Assistant](https://www.home-assistant.io/) configuration files
 
 ## Notice
 
-Home Assistant configuration layout can vary widely among users, however for performance reasons (and for the sake of
+Home Assistant configuration layouts can vary widely among users. However, for performance reasons (and for the sake of
 my sanity), some use cases are not supported:
 
 #### Code insights driven by includes
 
-I might implement this one day, but the issue is that you can include YAML code into other YAML code in multiple ways:
-`!include` et al., YAML anchors, `lovelace_gen`, some other unknown custom integration... so the plugin will just
-consider all YAML files in the module as Home Assistant configuration files.
+I might implement this one day, but the issue is that YAML code can be included in multiple ways:
+`!include` and related directives, YAML anchors, `lovelace_gen`, some other unknown custom integration...  
+Because of this complexity, the plugin considers all YAML files in the module as Home Assistant configuration files.
 
 #### Integrations not as top-level YAML keys
 
-Because of includes (see above), you could write something like this:
+Due to includes (see above), you could write something like this:
 
 ```yaml
 # in configuration.yml
@@ -56,25 +56,24 @@ script_name:
     [...]
 ```
 
-Because there are some many ways one could do this kind of stuff, this is not supported (and probably will never be).
-The only supported way is to always have the integration at top-level and use
+Since there are so many possible ways to structure this, it is not supported (and probably never will be).
+The only supported method is to always have integrations at the top level and use
 [packages](https://www.home-assistant.io/docs/configuration/packages/).
 
 ```yaml
 # in configuration.yml
 homeassistant:
-  # you can use whatever packages notation, the important thing is that
-  # every YAML file has integrations at top-level.
+  # you can use any packages notation, but every YAML file must have integrations at the top level.
   packages: !include_dir_named packages
 ```
 
 ```yaml
 # in packages/scripts.yml
-# every YAML file has integrations (in this case "script") at top-level.
+# every YAML file must have integrations (in this case, "script") at the top level.
 script:
   script_name:
     sequence:
-            [...]
+      [...]
 ```
 
 > [!NOTE]
