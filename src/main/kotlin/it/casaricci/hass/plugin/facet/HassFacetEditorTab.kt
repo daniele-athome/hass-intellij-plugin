@@ -30,6 +30,11 @@ class HassFacetEditorTab(
 
         manager.registerValidator(object : FacetEditorValidator() {
             override fun check(): ValidationResult {
+                // empty URL means offline usage
+                if (component.instanceUrl.isBlank()) {
+                    return ValidationResult.OK
+                }
+
                 val url = try {
                     Urls.parse(component.instanceUrl, false)
                 } catch (_: Exception) {
@@ -45,7 +50,12 @@ class HassFacetEditorTab(
 
         manager.registerValidator(object : FacetEditorValidator() {
             override fun check(): ValidationResult {
-                return if (component.token.trim().isNotEmpty()) {
+                // empty URL means offline usage, so we don't need a token
+                if (component.instanceUrl.isBlank()) {
+                    return ValidationResult.OK
+                }
+
+                return if (component.token.isNotBlank()) {
                     ValidationResult.OK
                 } else {
                     ValidationResult(MyBundle.message("hass.facet.editor.token.invalid"))
@@ -68,8 +78,8 @@ class HassFacetEditorTab(
     @Throws(ConfigurationException::class)
     override fun apply() {
         try {
-            state.instanceUrl = component.instanceUrl
-            state.token = component.token
+            state.instanceUrl = component.instanceUrl.trim()
+            state.token = component.token.trim()
 
             // trigger download immediately
             val service = HassRemoteRepository.getInstance(context.project)

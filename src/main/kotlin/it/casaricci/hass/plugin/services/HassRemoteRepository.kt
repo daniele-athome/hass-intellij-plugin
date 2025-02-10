@@ -48,6 +48,7 @@ import java.io.InputStream
 import java.nio.file.Path
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.isReadable
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.pathString
@@ -184,6 +185,10 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
         return cacheFile.isRegularFile() && cacheFile.isReadable()
     }
 
+    private fun isOfflineMode(module: Module): Boolean {
+        return getConfiguration(module)?.instanceUrl?.isBlank() ?: true
+    }
+
     /**
      * Refresh all Home Assistant data caches.
      * @return true if at least one refresh from network was triggered.
@@ -194,6 +199,12 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
     }
 
     private fun refreshServices(module: Module, force: Boolean = false): Boolean {
+        if (isOfflineMode(module)) {
+            // delete local cache file
+            getServicesCacheFile(module).deleteIfExists()
+            return true
+        }
+
         // TODO maybe invalidate the cache after some time?
         if (!isServicesCacheAvailable(module) || force) {
             downloadServices(module)
@@ -203,6 +214,12 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
     }
 
     private fun refreshStates(module: Module, force: Boolean = false): Boolean {
+        if (isOfflineMode(module)) {
+            // delete local cache file
+            getStatesCacheFile(module).deleteIfExists()
+            return true
+        }
+
         // TODO maybe invalidate the cache after some time?
         if (!isStatesCacheAvailable(module) || force) {
             downloadStates(module)
@@ -219,7 +236,9 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
             module,
             SERVICES_CACHE,
             {
-                val result: Collection<JsonProperty>? = if (isServicesCacheAvailable(module)) {
+                val result: Collection<JsonProperty>? = if (isOfflineMode(module)) {
+                    null
+                } else if (isServicesCacheAvailable(module)) {
                     ReadAction.compute<Collection<JsonProperty>, Throwable> {
                         try {
                             val virtualFile = LocalFileSystem.getInstance()
@@ -274,7 +293,9 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
             module,
             getStatesCacheKey(*excludeDomains),
             {
-                val result: Collection<JsonStringLiteral>? = if (isStatesCacheAvailable(module)) {
+                val result: Collection<JsonStringLiteral>? = if (isOfflineMode(module)) {
+                    null
+                } else if (isStatesCacheAvailable(module)) {
                     ReadAction.compute<Collection<JsonStringLiteral>, Throwable> {
                         try {
                             val virtualFile = LocalFileSystem.getInstance()

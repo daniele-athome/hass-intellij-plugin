@@ -33,24 +33,27 @@ class ProjectSettingsConfigurable(private val project: Project) : Configurable {
     override fun apply() {
         val other = settingsComponent!!
 
-        val url = try {
-            Urls.parse(other.instanceUrl, false)
-        } catch (_: Exception) {
-            null
-        }
+        // empty URL means offline usage
+        if (other.instanceUrl.isNotBlank()) {
+            val url = try {
+                Urls.parse(other.instanceUrl, false)
+            } catch (_: Exception) {
+                null
+            }
 
-        if (url == null) {
-            @Suppress("DialogTitleCapitalization")
-            throw ConfigurationException(MyBundle.message("hass.facet.editor.instanceUrl.invalid"))
-        }
+            if (url == null) {
+                @Suppress("DialogTitleCapitalization")
+                throw ConfigurationException(MyBundle.message("hass.facet.editor.instanceUrl.invalid"))
+            }
 
-        if (other.token.trim().isEmpty()) {
-            throw ConfigurationException(MyBundle.message("hass.facet.editor.token.invalid"))
+            if (other.token.isBlank()) {
+                throw ConfigurationException(MyBundle.message("hass.facet.editor.token.invalid"))
+            }
         }
 
         val state = ProjectSettings.getInstance(project).state
-        state.instanceUrl = other.instanceUrl
-        state.token = other.token
+        state.instanceUrl = other.instanceUrl.trim()
+        state.token = other.token.trim()
 
         // trigger download immediately
         val service = HassRemoteRepository.getInstance(project)
