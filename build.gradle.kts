@@ -1,5 +1,6 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
@@ -151,6 +152,10 @@ tasks {
                 "-Didea.max.intellisense.filesize=5242880"
             )
         }
+    }
+
+    val runPycharm by intellijPlatformTesting.runIde.registering {
+        type = IntelliJPlatformType.PyCharmCommunity
     }
 
     publishPlugin {
