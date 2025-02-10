@@ -1,0 +1,5 @@
+# used for completion with local data only (i.e. no states or services cache)
+script:
+  script_test1:
+    sequence:
+      - action: <caret>

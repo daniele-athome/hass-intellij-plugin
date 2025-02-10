@@ -1,0 +1,9 @@
+# used for completion with remote data only (i.e. with states cache)
+script:
+  script_test2:
+    sequence:
+      - action: scene.turn_on
+        target:
+          entity_id: <caret>
+
+# TODO add some other supported local entities (e.g. input_text, automation, ...)

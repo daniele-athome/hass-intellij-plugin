@@ -1,6 +1,0 @@
-script:
-  script_test1:
-    sequence:
-      - action: <caret>
-
-# TODO add some other supported local entities (e.g. input_text, automation, ...)
