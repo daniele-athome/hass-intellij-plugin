@@ -451,6 +451,8 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
      * Download error notification (usually network issues).
      */
     private fun notifyDownloadError(module: Module, message: String) {
+        val moduleRef = ModulePointerManager.getInstance(module.project).create(module)
+
         NotificationGroupManager.getInstance()
             .getNotificationGroup("Home Assistant data refresh")
             .createNotification(
@@ -458,6 +460,16 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
                 message,
                 NotificationType.ERROR
             )
+            .addAction(
+                NotificationAction.create(
+                    MyBundle.message("hass.notification.error.action.tryAgain"),
+                    "refresh-cache"
+                ) { _, notification ->
+                    moduleRef.module?.let { module ->
+                        refreshCache(module, true)
+                    }
+                    notification.hideBalloon()
+                })
             // TODO .addAction(<action for opening module settings>)
             .notify(project)
     }
@@ -475,12 +487,16 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
                 message,
                 NotificationType.ERROR
             )
-            .addAction(NotificationAction.create("Refresh data", "refresh-cache") { anAction, notification ->
-                moduleRef.module?.let { module ->
-                    refreshCache(module, true)
-                }
-                notification.hideBalloon()
-            })
+            .addAction(
+                NotificationAction.create(
+                    MyBundle.message("hass.notification.error.action.tryAgain"),
+                    "refresh-cache"
+                ) { _, notification ->
+                    moduleRef.module?.let { module ->
+                        refreshCache(module, true)
+                    }
+                    notification.hideBalloon()
+                })
             .notify(project)
     }
 
