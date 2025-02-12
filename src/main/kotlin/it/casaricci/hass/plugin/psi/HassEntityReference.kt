@@ -38,23 +38,23 @@ class HassEntityReference(
             var result: Array<ResolveResult>? = null
 
             if (SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS.contains(domainName)) {
-                result = handleKeyNameDomain(module, domainName, entityName)
+                result = resolveKeyNameDomain(module, domainName, entityName)
             } else {
                 when (domainName) {
                     HassKnownDomains.AUTOMATION -> {
-                        result = handleAutomation(module, entityName)
+                        result = resolveAutomation(module, entityName)
                     }
                 }
             }
 
             if (isActionCall(element)) {
                 if (result.isNullOrEmpty()) {
-                    // a (local) action (script) was not found, try resolving it as an action call
-                    result = handleActionCall(module, domainName, entityName)
+                    // a (local) action (script) was not found, try resolving it as a remote action call
+                    result = resolveRemoteAction(module, domainName, entityName)
                 }
             } else {
                 if (result.isNullOrEmpty()) {
-                    result = handleGenericEntity(module, domainName, entityName)
+                    result = resolveRemoteEntity(module, domainName, entityName)
                 }
             }
 
@@ -68,7 +68,7 @@ class HassEntityReference(
      * Resolves supported second-level entities (see [HassDataRepository.getKeyValueElementsForDomains] to understand
      * what that means). See [SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS] for supported domains.
      */
-    private fun handleKeyNameDomain(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
+    private fun resolveKeyNameDomain(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
         val service = HassDataRepository.getInstance(module.project)
         return service.getKeyValueElementsForDomains(module, domainName).filter {
             it.keyText == entityName
@@ -79,9 +79,10 @@ class HassEntityReference(
 
     /**
      * Automations are identified by the value of their "alias" key. The actual PSI element is wrapped by
-     * [it.casaricci.hass.plugin.language.HassAutomation].
+     * [it.casaricci.hass.plugin.language.HassAutomation]. That will actually resolve to either a local or remote
+     * automation.
      */
-    private fun handleAutomation(module: Module, entityName: String): Array<ResolveResult> {
+    private fun resolveAutomation(module: Module, entityName: String): Array<ResolveResult> {
         val service = HassDataRepository.getInstance(module.project)
         return service.getAutomations(module).filter {
             it.textValue == entityName
@@ -90,7 +91,10 @@ class HassEntityReference(
             .toTypedArray()
     }
 
-    private fun handleActionCall(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
+    /**
+     * Resolves any action call, taking the user to the remote services cache file.
+     */
+    private fun resolveRemoteAction(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
         val service = HassRemoteRepository.getInstance(module.project)
 
         val services = service.getServices(module)
@@ -107,7 +111,7 @@ class HassEntityReference(
     /**
      * Resolves any other entity, taking the user to the remote states (entities) cache file.
      */
-    private fun handleGenericEntity(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
+    private fun resolveRemoteEntity(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
         val service = HassRemoteRepository.getInstance(module.project)
 
         val states = service.getStates(module, HassKnownDomains.SCRIPT, HassKnownDomains.AUTOMATION)
