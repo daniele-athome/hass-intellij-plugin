@@ -386,8 +386,7 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
                         } catch (e: ProcessCanceledException) {
                             // canceled
                             throw e
-                        } catch (e: Exception) {
-                            log.error("Unable to download services", e)
+                        } catch (e: IOException) {
                             notifyDownloadError(module, e.toString())
                         }
                     }
@@ -429,8 +428,7 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
                         } catch (e: ProcessCanceledException) {
                             // canceled
                             throw e
-                        } catch (e: Exception) {
-                            log.error("Unable to download states", e)
+                        } catch (e: IOException) {
                             notifyDownloadError(module, e.toString())
                         }
                     }
