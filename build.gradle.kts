@@ -45,11 +45,6 @@ dependencies {
         // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
 
-        // TODO remove after https://youtrack.jetbrains.com/issue/IJPL-177264 has been fixed
-        if (providers.gradleProperty("platformVersion").get() == "251.20015.29-EAP-SNAPSHOT") {
-            bundledModule("intellij.yaml.editing")
-        }
-
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 
