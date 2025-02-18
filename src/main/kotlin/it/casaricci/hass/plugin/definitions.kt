@@ -48,6 +48,8 @@ val SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS = hashSetOf(
     // TODO groups can also be defined via "platform: group" notation
     "group",
     "shell_command",
+    "rest_command",
+    "timer",
 )
 
 // TODO val SECOND_LEVEL_ATTRIBUTE_IDENTIFIER_DOMAINS = ...
