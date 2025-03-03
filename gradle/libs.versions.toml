@@ -5,8 +5,7 @@ kotlinSerialization = "1.8.0"
 
 # plugins
 changelog = "2.2.1"
-# TODO remove snapshot after release
-intelliJPlatform = "2.2.2-SNAPSHOT"
+intelliJPlatform = "2.3.0"
 kotlin = "1.9.25"
 kover = "0.8.3"
 qodana = "2024.2.3"
