@@ -15,9 +15,8 @@ First of all, thanks for taking the time to contribute.
 If you are not fluent with IntelliJ plugin development, you should start by reading
 [their documentation](https://plugins.jetbrains.com/docs/intellij/welcome.html). It is not perfect - IntelliJ is a huge
 project - but it really helps giving a big picture and a straight track to follow. Much of your learning will also come
-from browsing the [old forums](https://intellij-support.jetbrains.com/hc/en-us/community/topics/200366979-IntelliJ-IDEA-Open-API-and-Plugin-Development)
-and the [new forums](https://platform.jetbrains.com/), diving through other plugins and IntelliJ platform source code,
-trials and errors, and a lot of time.
+from browsing the [old forums](https://intellij-support.jetbrains.com/hc/en-us/community/topics/200366979-IntelliJ-IDEA-Open-API-and-Plugin-Development) and the [new forums](https://platform.jetbrains.com/), diving through other plugins and IntelliJ platform source
+code, trials and errors, and a lot of time.
 
 ## Dive into the code first
 
@@ -32,7 +31,8 @@ Please look at the existing code before writing anything and try to follow some 
 2. Try to put the code in the right package using your best judgement
 3. Java is not allowed, only Kotlin please
 4. I know it's boring, but please _please_ write tests :smiling_face_with_three_hearts:
-5. Prefer fast but memory-hungry over slow and low memory footprint: IDEs need to be fast but sometimes require more memory in order to be
+5. Prefer fast but memory-hungry over slow and low memory footprint: IDEs need to be fast and sometimes that might need
+   higher memory usage
 
 ## Contribute new features
 
