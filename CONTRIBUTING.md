@@ -32,7 +32,7 @@ Please look at the existing code before writing anything and try to follow some 
 3. Java is not allowed, only Kotlin please
 4. I know it's boring, but please _please_ write tests :smiling_face_with_three_hearts:
 5. Prefer fast but memory-hungry over slow and low memory footprint: IDEs need to be fast and sometimes that might need
-   higher memory usage
+   higher memory usage (i.e. use caches)
 
 ## Contribute new features
 
