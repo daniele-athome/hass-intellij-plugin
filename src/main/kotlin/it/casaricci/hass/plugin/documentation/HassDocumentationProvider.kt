@@ -25,10 +25,14 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
 
     /**
      * This part of the API is not really well documented yet - I guess because it's relatively new.
-     * This method is called in various situations and I didn't really knew how to detect each situation but by
-     * reverse-engineering the method arguments. The current code seems to handle all (3+1) situations well - for now.
+     * This method is called in various situations and I didn't really knew how to detect each
+     * situation but by reverse-engineering the method arguments. The current code seems to handle
+     * all (3+1) situations well - for now.
      */
-    override fun documentationTarget(element: PsiElement, originalElement: PsiElement?): DocumentationTarget? {
+    override fun documentationTarget(
+        element: PsiElement,
+        originalElement: PsiElement?,
+    ): DocumentationTarget? {
         // we still don't know when originalElement could be null, better safe than sorry
         if (originalElement == null) {
             return null
@@ -37,34 +41,41 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
         // documentation request coming from a Home Assistant YAML file
         if (isHassConfigFile(originalElement)) {
             // documentation request coming from an action call
-            if ((originalElement.parent is YAMLScalar && isActionCall(originalElement.parent as YAMLScalar) ||
-                        isScriptDefinition(originalElement.parent))
+            if (
+                (originalElement.parent is YAMLScalar &&
+                    isActionCall(originalElement.parent as YAMLScalar) ||
+                    isScriptDefinition(originalElement.parent))
             ) {
                 val resolveReference: Boolean
 
                 // documentation request from a code completion popup
-                val documentedElement = if (element is JsonProperty || element is YAMLKeyValue) {
-                    resolveReference = false
-                    element
-                }
-                // documentation request directly to the action call
-                else if (element.parent is YAMLScalar) {
-                    resolveReference = true
-                    element.parent
-                }
-                // documentation request on the entity definition
-                else if (element.parent is YAMLKeyValue) {
-                    resolveReference = false
-                    element.parent
-                }
-                // unhandled case?
-                else {
-                    resolveReference = false
-                    null
-                }
+                val documentedElement =
+                    if (element is JsonProperty || element is YAMLKeyValue) {
+                        resolveReference = false
+                        element
+                    }
+                    // documentation request directly to the action call
+                    else if (element.parent is YAMLScalar) {
+                        resolveReference = true
+                        element.parent
+                    }
+                    // documentation request on the entity definition
+                    else if (element.parent is YAMLKeyValue) {
+                        resolveReference = false
+                        element.parent
+                    }
+                    // unhandled case?
+                    else {
+                        resolveReference = false
+                        null
+                    }
 
                 if (documentedElement != null) {
-                    return HassDocumentationActionTarget(documentedElement, originalElement, resolveReference)
+                    return HassDocumentationActionTarget(
+                        documentedElement,
+                        originalElement,
+                        resolveReference,
+                    )
                 }
             }
         }
@@ -76,17 +87,27 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
     internal class HassDocumentationActionTarget(
         private val element: PsiElement,
         private val originalElement: PsiElement?,
-        private val resolveReference: Boolean
+        private val resolveReference: Boolean,
     ) : DocumentationTarget {
 
         override fun createPointer(): Pointer<out DocumentationTarget> {
-            // cannot use createSmartPointer extension because it was added in a later version of the platform SDK
-            val elementPtr = SmartPointerManager.getInstance(element.project).createSmartPsiElementPointer(element)
+            // cannot use createSmartPointer extension because it was added in a later version of
+            // the
+            // platform SDK
+            val elementPtr =
+                SmartPointerManager.getInstance(element.project)
+                    .createSmartPsiElementPointer(element)
             val originalElementPtr =
-                originalElement?.let { SmartPointerManager.getInstance(it.project).createSmartPsiElementPointer(it) }
+                originalElement?.let {
+                    SmartPointerManager.getInstance(it.project).createSmartPsiElementPointer(it)
+                }
             return Pointer {
                 val element = elementPtr.dereference() ?: return@Pointer null
-                HassDocumentationActionTarget(element, originalElementPtr?.dereference(), resolveReference)
+                HassDocumentationActionTarget(
+                    element,
+                    originalElementPtr?.dereference(),
+                    resolveReference,
+                )
             }
         }
 
@@ -100,26 +121,29 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
                 }
             }
 
-            return TargetPresentation
-                .builder(element.text)
+            return TargetPresentation.builder(element.text)
                 .locationText(moduleTextWithIcon?.text, moduleTextWithIcon?.icon)
                 .presentation()
         }
 
         override fun computeDocumentation(): DocumentationResult? {
-            val resolvedElement = if (resolveReference) {
-                element.reference?.resolve()
-            } else {
-                element
-            }
+            val resolvedElement =
+                if (resolveReference) {
+                    element.reference?.resolve()
+                } else {
+                    element
+                }
 
             return resolvedElement?.let { action ->
                 when (action) {
                     // local script
                     is YAMLKeyValue -> {
-                        val description = action.childrenOfType<YAMLMapping>().firstOrNull()
-                            ?.getKeyValueByKey("description")
-                            ?.valueText
+                        val description =
+                            action
+                                .childrenOfType<YAMLMapping>()
+                                .firstOrNull()
+                                ?.getKeyValueByKey("description")
+                                ?.valueText
                         if (description != null) {
                             val entityId = entityId(HassKnownDomains.SCRIPT, action.keyText)
                             return documentationForEntity(entityId, description)
@@ -130,8 +154,10 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
                     // remote action
                     is JsonProperty -> {
                         return (action.value as? JsonObject)?.let { properties ->
-                            return (properties.findProperty("description")?.value as? JsonStringLiteral)
-                                ?.value?.let { description ->
+                            return (properties.findProperty("description")?.value
+                                    as? JsonStringLiteral)
+                                ?.value
+                                ?.let { description ->
                                     return getDomainNameFromActionName(action)?.let { domainName ->
                                         val entityId = entityId(domainName, action.name)
                                         return documentationForEntity(entityId, description)
@@ -147,19 +173,15 @@ class HassDocumentationProvider : PsiDocumentationTargetProvider {
             }
         }
 
-        private fun documentationForEntity(entityId: String, description: String): DocumentationResult =
-            DocumentationResult
-                .documentation(
-                    "<p><b>$entityId</b></p>" +
-                            "<p>$description</p>"
-                )
+        private fun documentationForEntity(
+            entityId: String,
+            description: String,
+        ): DocumentationResult =
+            DocumentationResult.documentation("<p><b>$entityId</b></p>" + "<p>$description</p>")
 
-        /**
-         * Never called.
-         */
+        /** Never called. */
         override fun computeDocumentationHint(): String? {
             return null
         }
-
     }
 }

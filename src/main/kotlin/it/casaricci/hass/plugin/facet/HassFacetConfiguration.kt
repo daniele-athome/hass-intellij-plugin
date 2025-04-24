@@ -6,9 +6,7 @@ import com.intellij.facet.ui.FacetEditorTab
 import com.intellij.facet.ui.FacetValidatorsManager
 import com.intellij.openapi.components.PersistentStateComponent
 
-
 class HassFacetConfiguration : FacetConfiguration, PersistentStateComponent<HassFacetState> {
-
     private var state = HassFacetState("", "")
 
     override fun getState(): HassFacetState = state
@@ -19,11 +17,6 @@ class HassFacetConfiguration : FacetConfiguration, PersistentStateComponent<Hass
 
     override fun createEditorTabs(
         context: FacetEditorContext,
-        manager: FacetValidatorsManager
-    ): Array<FacetEditorTab> {
-        return arrayOf(
-            HassFacetEditorTab(state, context, manager)
-        )
-    }
-
+        manager: FacetValidatorsManager,
+    ): Array<FacetEditorTab> = arrayOf(HassFacetEditorTab(state, context, manager))
 }

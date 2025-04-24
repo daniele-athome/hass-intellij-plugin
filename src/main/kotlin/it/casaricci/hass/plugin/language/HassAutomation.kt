@@ -11,20 +11,20 @@ import org.jetbrains.yaml.psi.YAMLScalar
 import org.jetbrains.yaml.psi.impl.YAMLKeyValueImpl
 
 /**
- * Wraps the "alias" key value element of an automation, giving the element [PsiNamedElement] features.
+ * Wraps the "alias" key value element of an automation, giving the element [PsiNamedElement]
+ * features.
  */
 // FIXME "Jump to source" doesn't work with this element for some reason
 class HassAutomation(private val element: YAMLScalar) : PsiNamedElement, YAMLScalar by element {
 
-    /**
-     * Automation name is actually the value of the "alias" key.
-     */
+    /** Automation name is actually the value of the "alias" key. */
     override fun getName(): String {
         return element.textValue
     }
 
     /**
-     * Copied from [YAMLKeyValueImpl] + [org.jetbrains.yaml.YAMLUtil], although it seems like overkill.
+     * Copied from [YAMLKeyValueImpl] + [org.jetbrains.yaml.YAMLUtil], although it seems like
+     * overkill.
      */
     override fun setName(name: String): PsiElement {
         if (name == element.textValue) {
@@ -34,7 +34,8 @@ class HassAutomation(private val element: YAMLScalar) : PsiNamedElement, YAMLSca
         val elementGenerator = YAMLElementGenerator.getInstance(element.project)
 
         val tempFile: PsiFile = elementGenerator.createDummyYamlWithText(name)
-        val textElement = PsiTreeUtil.collectElementsOfType(tempFile, YAMLScalar::class.java).iterator().next()
+        val textElement =
+            PsiTreeUtil.collectElementsOfType(tempFile, YAMLScalar::class.java).iterator().next()
 
         element.replace(textElement)
         return this

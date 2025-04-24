@@ -8,27 +8,18 @@ import com.intellij.openapi.project.Project
 import it.casaricci.hass.plugin.facet.HassFacetState
 
 @Service(Service.Level.PROJECT)
-@State(
-    name = "org.intellij.sdk.settings.AppSettings",
-    storages = [Storage("homeAssistant.xml")]
-)
+@State(name = "org.intellij.sdk.settings.AppSettings", storages = [Storage("homeAssistant.xml")])
 class ProjectSettings(val project: Project) : PersistentStateComponent<HassFacetState> {
-
     private var myState = HassFacetState()
 
-    override fun getState(): HassFacetState {
-        return myState
-    }
+    override fun getState(): HassFacetState = myState
 
     override fun loadState(state: HassFacetState) {
         myState = state
     }
 
     companion object {
-
-        fun getInstance(project: Project): ProjectSettings {
-            return project.getService(ProjectSettings::class.java)
-        }
+        fun getInstance(project: Project): ProjectSettings =
+            project.getService(ProjectSettings::class.java)
     }
-
 }

@@ -28,9 +28,7 @@ class HassScriptFindUsagesProvider : FindUsagesProvider {
         return ""
     }
 
-    /**
-     * Called but return value is not used probably because YAML plugin takes precedence.
-     */
+    /** Called but return value is not used probably because YAML plugin takes precedence. */
     override fun getDescriptiveName(element: PsiElement): String {
         // since this is not used (for now), avoid losing time doing useless stuff
         /*if (isMyElement(element)) {
@@ -39,9 +37,7 @@ class HassScriptFindUsagesProvider : FindUsagesProvider {
         return ""
     }
 
-    /**
-     * Actually never called because YAML plugin takes precedence.
-     */
+    /** Actually never called because YAML plugin takes precedence. */
     override fun getNodeText(element: PsiElement, useFullName: Boolean): String {
         // since this is not used (for now), avoid losing time doing useless stuff
         /*if (isMyElement(element)) {

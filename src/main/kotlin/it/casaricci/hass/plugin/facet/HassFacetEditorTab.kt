@@ -6,13 +6,13 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.util.Urls
 import it.casaricci.hass.plugin.MyBundle
 import it.casaricci.hass.plugin.services.HassRemoteRepository
-import org.jetbrains.annotations.Nls
 import javax.swing.JComponent
+import org.jetbrains.annotations.Nls
 
 class HassFacetEditorTab(
     private val state: HassFacetState,
     private val context: FacetEditorContext,
-    private val manager: FacetValidatorsManager
+    private val manager: FacetValidatorsManager,
 ) : FacetEditorTab() {
 
     private lateinit var component: HassFacetSettingsComponent
@@ -23,56 +23,62 @@ class HassFacetEditorTab(
     }
 
     override fun createComponent(): JComponent {
-        component = HassFacetSettingsComponent().apply {
-            instanceUrl = state.instanceUrl
-            token = state.token
-        }
-
-        manager.registerValidator(object : FacetEditorValidator() {
-            override fun check(): ValidationResult {
-                // empty URL means offline usage
-                if (component.instanceUrl.isBlank()) {
-                    return ValidationResult.OK
-                }
-
-                val url = try {
-                    Urls.parse(component.instanceUrl, false)
-                } catch (_: Exception) {
-                    null
-                }
-                return if (url != null) {
-                    ValidationResult.OK
-                } else {
-                    ValidationResult(MyBundle.message("hass.facet.editor.instanceUrl.invalid"))
-                }
+        component =
+            HassFacetSettingsComponent().apply {
+                instanceUrl = state.instanceUrl
+                token = state.token
             }
-        }, component.instanceUrlField)
 
-        manager.registerValidator(object : FacetEditorValidator() {
-            override fun check(): ValidationResult {
-                // empty URL means offline usage, so we don't need a token
-                if (component.instanceUrl.isBlank()) {
-                    return ValidationResult.OK
+        manager.registerValidator(
+            object : FacetEditorValidator() {
+                override fun check(): ValidationResult {
+                    // empty URL means offline usage
+                    if (component.instanceUrl.isBlank()) {
+                        return ValidationResult.OK
+                    }
+
+                    val url =
+                        try {
+                            Urls.parse(component.instanceUrl, false)
+                        } catch (_: Exception) {
+                            null
+                        }
+                    return if (url != null) {
+                        ValidationResult.OK
+                    } else {
+                        ValidationResult(MyBundle.message("hass.facet.editor.instanceUrl.invalid"))
+                    }
                 }
+            },
+            component.instanceUrlField,
+        )
 
-                return if (component.token.isNotBlank()) {
-                    ValidationResult.OK
-                } else {
-                    ValidationResult(MyBundle.message("hass.facet.editor.token.invalid"))
+        manager.registerValidator(
+            object : FacetEditorValidator() {
+                override fun check(): ValidationResult {
+                    // empty URL means offline usage, so we don't need a token
+                    if (component.instanceUrl.isBlank()) {
+                        return ValidationResult.OK
+                    }
+
+                    return if (component.token.isNotBlank()) {
+                        ValidationResult.OK
+                    } else {
+                        ValidationResult(MyBundle.message("hass.facet.editor.token.invalid"))
+                    }
                 }
-            }
-        }, component.tokenField)
+            },
+            component.tokenField,
+        )
 
-        component.setRefreshButtonListener {
-            apply()
-        }
+        component.setRefreshButtonListener { apply() }
 
         return component.panel
     }
 
     override fun isModified(): Boolean {
         return !StringUtil.equals(state.instanceUrl, component.instanceUrl.trim()) ||
-                !StringUtil.equals(state.token, component.token.trim())
+            !StringUtil.equals(state.token, component.token.trim())
     }
 
     @Throws(ConfigurationException::class)
@@ -84,7 +90,6 @@ class HassFacetEditorTab(
             // trigger download immediately
             val service = HassRemoteRepository.getInstance(context.project)
             service.refreshCache(context.module, true)
-
         } catch (e: Exception) {
             throw ConfigurationException(e.toString())
         }
@@ -94,5 +99,4 @@ class HassFacetEditorTab(
         component.instanceUrl = state.instanceUrl
         component.token = state.token
     }
-
 }

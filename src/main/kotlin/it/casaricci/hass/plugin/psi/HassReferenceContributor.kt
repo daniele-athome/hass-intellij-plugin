@@ -16,22 +16,23 @@ internal class HassReferenceContributor : PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
         registrar.registerReferenceProvider(
             PlatformPatterns.psiElement(YAMLScalar::class.java),
-            HassReferenceProvider()
+            HassReferenceProvider(),
         )
     }
 
     class HassReferenceProvider : PsiReferenceProvider() {
 
-        override fun getReferencesByElement(element: PsiElement, context: ProcessingContext): Array<PsiReference> {
+        override fun getReferencesByElement(
+            element: PsiElement,
+            context: ProcessingContext,
+        ): Array<PsiReference> {
             val originalElement = CompletionUtil.getOriginalOrSelf(element)
             if (originalElement is YAMLScalar) {
                 val text = originalElement.text
 
                 if (text.startsWith(PREFIX_SECRET)) {
-                    val range = TextRange.from(
-                        PREFIX_SECRET.length,
-                        text.length - PREFIX_SECRET.length
-                    )
+                    val range =
+                        TextRange.from(PREFIX_SECRET.length, text.length - PREFIX_SECRET.length)
                     return arrayOf(
                         HassSecretReference(originalElement, range, range.substring(text))
                     )
@@ -49,5 +50,4 @@ internal class HassReferenceContributor : PsiReferenceContributor() {
             return PsiReference.EMPTY_ARRAY
         }
     }
-
 }

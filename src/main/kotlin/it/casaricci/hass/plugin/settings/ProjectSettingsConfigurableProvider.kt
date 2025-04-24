@@ -6,15 +6,9 @@ import com.intellij.openapi.project.Project
 import it.casaricci.hass.plugin.internal.PlatformUtils
 
 class ProjectSettingsConfigurableProvider(private val project: Project) : ConfigurableProvider() {
+    override fun createConfigurable(): Configurable = ProjectSettingsConfigurable(project)
 
-    override fun createConfigurable(): Configurable {
-        return ProjectSettingsConfigurable(project)
-    }
-
-    override fun canCreateConfigurable(): Boolean {
-        return usesProjectSettings()
-    }
-
+    override fun canCreateConfigurable(): Boolean = usesProjectSettings()
 }
 
 /**

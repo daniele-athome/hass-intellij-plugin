@@ -19,10 +19,8 @@ class HassEntityReference(
     element: YAMLScalar,
     range: TextRange?,
     private val domainName: String,
-    private val entityName: String
-) :
-    PsiPolyVariantReferenceBase<YAMLScalar>(element, range) {
-
+    private val entityName: String,
+) : PsiPolyVariantReferenceBase<YAMLScalar>(element, range) {
     private val range = TextRange.allOf(entityId(domainName, entityName))
 
     /**
@@ -49,7 +47,8 @@ class HassEntityReference(
 
             if (isActionCall(element)) {
                 if (result.isNullOrEmpty()) {
-                    // a (local) action (script) was not found, try resolving it as a remote action call
+                    // a (local) action (script) was not found, try resolving it as a remote action
+                    // call
                     result = resolveRemoteAction(module, domainName, entityName)
                 }
             } else {
@@ -65,66 +64,75 @@ class HassEntityReference(
     }
 
     /**
-     * Resolves supported second-level entities (see [HassDataRepository.getKeyValueElementsForDomains] to understand
-     * what that means). See [SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS] for supported domains.
+     * Resolves supported second-level entities (see
+     * [HassDataRepository.getKeyValueElementsForDomains] to understand what that means). See
+     * [SECOND_LEVEL_KEY_IDENTIFIER_DOMAINS] for supported domains.
      */
-    private fun resolveKeyNameDomain(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
+    private fun resolveKeyNameDomain(
+        module: Module,
+        domainName: String,
+        entityName: String,
+    ): Array<ResolveResult> {
         val service = HassDataRepository.getInstance(module.project)
-        return service.getKeyValueElementsForDomains(module, domainName).filter {
-            it.keyText == entityName
-        }
+        return service
+            .getKeyValueElementsForDomains(module, domainName)
+            .filter { it.keyText == entityName }
             .map { result -> PsiElementResolveResult(result) }
             .toTypedArray()
     }
 
     /**
-     * Automations are identified by the value of their "alias" key. The actual PSI element is wrapped by
-     * [it.casaricci.hass.plugin.language.HassAutomation]. That will actually resolve to either a local or remote
-     * automation.
+     * Automations are identified by the value of their "alias" key. The actual PSI element is
+     * wrapped by [it.casaricci.hass.plugin.language.HassAutomation]. That will actually resolve to
+     * either a local or remote automation.
      */
     private fun resolveAutomation(module: Module, entityName: String): Array<ResolveResult> {
         val service = HassDataRepository.getInstance(module.project)
-        return service.getAutomations(module).filter {
-            it.textValue == entityName
-        }
+        return service
+            .getAutomations(module)
+            .filter { it.textValue == entityName }
             .map { result -> PsiElementResolveResult(result) }
             .toTypedArray()
     }
 
-    /**
-     * Resolves any action call, taking the user to the remote services cache file.
-     */
-    private fun resolveRemoteAction(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
+    /** Resolves any action call, taking the user to the remote services cache file. */
+    private fun resolveRemoteAction(
+        module: Module,
+        domainName: String,
+        entityName: String,
+    ): Array<ResolveResult> {
         val service = HassRemoteRepository.getInstance(module.project)
 
         val services = service.getServices(module)
         if (services != null) {
-            return PsiElementResolveResult.createResults(services.filter {
-                it.name == entityName && getDomainNameFromActionName(it) == domainName
-            })
+            return PsiElementResolveResult.createResults(
+                services.filter {
+                    it.name == entityName && getDomainNameFromActionName(it) == domainName
+                }
+            )
         }
         // for now we don't trigger a download from here (we need to handle several race conditions)
 
         return ResolveResult.EMPTY_ARRAY
     }
 
-    /**
-     * Resolves any other entity, taking the user to the remote states (entities) cache file.
-     */
-    private fun resolveRemoteEntity(module: Module, domainName: String, entityName: String): Array<ResolveResult> {
+    /** Resolves any other entity, taking the user to the remote states (entities) cache file. */
+    private fun resolveRemoteEntity(
+        module: Module,
+        domainName: String,
+        entityName: String,
+    ): Array<ResolveResult> {
         val service = HassRemoteRepository.getInstance(module.project)
 
         val states = service.getStates(module, HassKnownDomains.SCRIPT, HassKnownDomains.AUTOMATION)
         if (states != null) {
             val entityId = "$domainName.$entityName"
-            return states.filter {
-                it.value == entityId
-            }
+            return states
+                .filter { it.value == entityId }
                 .map { result -> PsiElementResolveResult(result) }
                 .toTypedArray()
         }
 
         return ResolveResult.EMPTY_ARRAY
     }
-
 }

@@ -6,9 +6,11 @@ import org.jetbrains.yaml.YAMLLanguage
 import org.jetbrains.yaml.psi.YAMLScalar
 
 class HassCharFilter : CharFilter() {
-
     override fun acceptChar(c: Char, prefixLength: Int, lookup: Lookup?): Result? {
-        if (lookup?.psiFile?.language == YAMLLanguage.INSTANCE && lookup?.psiElement?.nextSibling is YAMLScalar) {
+        if (
+            lookup?.psiFile?.language == YAMLLanguage.INSTANCE &&
+                lookup?.psiElement?.nextSibling is YAMLScalar
+        ) {
             // "." is for entity ID: "sensor.name"
             // ":" is for icon names: "mdi:home"
             if (c == '.' || c == ':') {
@@ -17,5 +19,4 @@ class HassCharFilter : CharFilter() {
         }
         return null
     }
-
 }

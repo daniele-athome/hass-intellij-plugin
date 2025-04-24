@@ -8,7 +8,6 @@ import it.casaricci.hass.plugin.services.HassRemoteRepository
 import org.junit.Test
 
 class EntityCompletionTest : LightPlatformCodeInsightFixture4TestCase() {
-
     override fun getTestDataPath(): String = "src/test/resources/completion/entity"
 
     @Test
@@ -21,16 +20,18 @@ class EntityCompletionTest : LightPlatformCodeInsightFixture4TestCase() {
             lookupElementStrings!!,
             "script.script_test1",
             "script.do_some_action",
-            "script.do_some_other_action"
+            "script.do_some_other_action",
         )
     }
 
     @Test
     fun testRemoteCompletion() {
         // mock entity states
-        myFixture.project.replaceService(HassRemoteRepository::class.java, MockHassRemoteRepository(project,
-            "$testDataPath/states.json", null),
-            testRootDisposable)
+        myFixture.project.replaceService(
+            HassRemoteRepository::class.java,
+            MockHassRemoteRepository(project, "$testDataPath/states.json", null),
+            testRootDisposable,
+        )
 
         myFixture.configureByFiles("configuration-remote.yaml", "scripts.yaml")
         myFixture.complete(CompletionType.BASIC)
@@ -41,8 +42,7 @@ class EntityCompletionTest : LightPlatformCodeInsightFixture4TestCase() {
             "script.script_test2",
             "script.do_some_action",
             "script.do_some_other_action",
-            "scene.house_entrance"
+            "scene.house_entrance",
         )
     }
-
 }

@@ -10,18 +10,11 @@ import org.jetbrains.yaml.psi.YAMLDocument
 import org.jetbrains.yaml.psi.YAMLKeyValue
 
 class HassSecretFindUsagesProvider : FindUsagesProvider {
+    override fun getWordsScanner(): WordsScanner = YAMLWordsScanner()
 
-    override fun getWordsScanner(): WordsScanner {
-        return YAMLWordsScanner()
-    }
+    override fun canFindUsagesFor(element: PsiElement): Boolean = isMyElement(element)
 
-    override fun canFindUsagesFor(element: PsiElement): Boolean {
-        return isMyElement(element)
-    }
-
-    override fun getHelpId(element: PsiElement): String? {
-        return null
-    }
+    override fun getHelpId(element: PsiElement): String? = null
 
     override fun getType(element: PsiElement): String {
         if (isMyElement(element)) {
@@ -46,7 +39,8 @@ class HassSecretFindUsagesProvider : FindUsagesProvider {
         return ""
     }
 
-    private fun isMyElement(element: PsiElement): Boolean = element is YAMLKeyValue &&
+    private fun isMyElement(element: PsiElement): Boolean =
+        element is YAMLKeyValue &&
             element.parentMapping?.parent is YAMLDocument &&
             element.containingFile.name == HassKnownFilenames.SECRETS
 }

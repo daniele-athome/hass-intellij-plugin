@@ -5,7 +5,6 @@ import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestC
 import org.junit.Test
 
 class SecretsCompletionTest : LightPlatformCodeInsightFixture4TestCase() {
-
     override fun getTestDataPath(): String = "src/test/resources/completion/secrets"
 
     @Test
@@ -16,5 +15,4 @@ class SecretsCompletionTest : LightPlatformCodeInsightFixture4TestCase() {
         assertNotNull(lookupElementStrings)
         assertSameElements(lookupElementStrings!!, "latitude_home", "longitude_home")
     }
-
 }

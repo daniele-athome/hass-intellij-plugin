@@ -10,42 +10,35 @@ import javax.swing.JPanel
 import javax.swing.JTextField
 
 class HassFacetSettingsComponent {
-
     /** We need public access for the facet editor tab. */
     val instanceUrlField = JTextField()
 
     /** We need public access for the facet editor tab. */
     val tokenField = JTextField()
 
-    private val refreshButton = JButton(MyBundle.message("hass.facet.editor.refresh.text"), AllIcons.Actions.Refresh)
+    private val refreshButton =
+        JButton(MyBundle.message("hass.facet.editor.refresh.text"), AllIcons.Actions.Refresh)
 
     val panel: JPanel
     val preferredFocusedComponent = instanceUrlField
 
     init {
-        val contentPanel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(
-                MyBundle.message("hass.facet.editor.instanceUrl.title"),
-                instanceUrlField
-            )
-            .addLabeledComponent(
-                MyBundle.message("hass.facet.editor.token.title"),
-                tokenField
-            )
-            .addComponent(refreshButton)
-            .panel.apply {
-                border = JBUI.Borders.empty(10)
-            }
+        val contentPanel =
+            FormBuilder.createFormBuilder()
+                .addLabeledComponent(
+                    MyBundle.message("hass.facet.editor.instanceUrl.title"),
+                    instanceUrlField,
+                )
+                .addLabeledComponent(MyBundle.message("hass.facet.editor.token.title"), tokenField)
+                .addComponent(refreshButton)
+                .panel
+                .apply { border = JBUI.Borders.empty(10) }
 
-        panel = JPanel(BorderLayout()).apply {
-            add(contentPanel, BorderLayout.NORTH)
-        }
+        panel = JPanel(BorderLayout()).apply { add(contentPanel, BorderLayout.NORTH) }
     }
 
     fun setRefreshButtonListener(listener: () -> Unit) {
-        refreshButton.addActionListener {
-            listener()
-        }
+        refreshButton.addActionListener { listener() }
     }
 
     var instanceUrl: String
@@ -59,5 +52,4 @@ class HassFacetSettingsComponent {
         set(value) {
             tokenField.text = value
         }
-
 }

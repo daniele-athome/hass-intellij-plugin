@@ -21,18 +21,18 @@ import org.jetbrains.annotations.NotNull
  * [Unbearably slow](https://github.com/daniele-athome/hass-intellij-plugin/issues/7).
  */
 class MdiIconCompletionProvider : CompletionProvider<CompletionParameters>(), DumbAware {
-
     public override fun addCompletions(
         @NotNull parameters: CompletionParameters,
         @NotNull context: ProcessingContext,
-        @NotNull resultSet: CompletionResultSet
+        @NotNull resultSet: CompletionResultSet,
     ) {
-        val cache = try {
-            initCache()
-        } catch (e: Exception) {
-            notifyLoadIconsError(parameters.position.project, e.toString())
-            return
-        }
+        val cache =
+            try {
+                initCache()
+            } catch (e: Exception) {
+                notifyLoadIconsError(parameters.position.project, e.toString())
+                return
+            }
 
         // useless advertisement, links are not clickable
         // resultSet.addLookupAdvertisement("Icons available at https://materialdesignicons.com/")
@@ -45,11 +45,12 @@ class MdiIconCompletionProvider : CompletionProvider<CompletionParameters>(), Du
 
         private fun initCache(): List<LookupElement> {
             if (lookupList == null) {
-                lookupList = MdiIconsRepository.loadIcons().map {
-                    LookupElementBuilder.create(ICON_NAME_PREFIX + it.key)
-                        .withIcon(MdiIconsRepository.getIcon(it.value))
-                        .withAutoCompletionPolicy(AutoCompletionPolicy.GIVE_CHANCE_TO_OVERWRITE)
-                }
+                lookupList =
+                    MdiIconsRepository.loadIcons().map {
+                        LookupElementBuilder.create(ICON_NAME_PREFIX + it.key)
+                            .withIcon(MdiIconsRepository.getIcon(it.value))
+                            .withAutoCompletionPolicy(AutoCompletionPolicy.GIVE_CHANCE_TO_OVERWRITE)
+                    }
             }
             return lookupList!!
         }
@@ -61,9 +62,8 @@ class MdiIconCompletionProvider : CompletionProvider<CompletionParameters>(), Du
             .createNotification(
                 MyBundle.message("hass.notification.loadIconsError.title"),
                 message,
-                NotificationType.ERROR
+                NotificationType.ERROR,
             )
             .notify(project)
     }
-
 }

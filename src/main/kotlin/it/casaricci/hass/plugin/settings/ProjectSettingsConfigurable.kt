@@ -11,7 +11,6 @@ import it.casaricci.hass.plugin.services.HassRemoteRepository
 import javax.swing.JComponent
 
 class ProjectSettingsConfigurable(private val project: Project) : Configurable {
-
     private var settingsComponent: HassFacetSettingsComponent? = null
 
     override fun createComponent(): JComponent {
@@ -19,15 +18,13 @@ class ProjectSettingsConfigurable(private val project: Project) : Configurable {
         return settingsComponent!!.panel
     }
 
-    override fun getPreferredFocusedComponent(): JComponent {
-        return settingsComponent!!.preferredFocusedComponent
-    }
+    override fun getPreferredFocusedComponent(): JComponent =
+        settingsComponent!!.preferredFocusedComponent
 
     override fun isModified(): Boolean {
         val state = ProjectSettings.getInstance(project).state
         val other = settingsComponent!!
-        return state.instanceUrl != other.instanceUrl ||
-                state.token != other.token
+        return state.instanceUrl != other.instanceUrl || state.token != other.token
     }
 
     override fun apply() {
@@ -35,15 +32,18 @@ class ProjectSettingsConfigurable(private val project: Project) : Configurable {
 
         // empty URL means offline usage
         if (other.instanceUrl.isNotBlank()) {
-            val url = try {
-                Urls.parse(other.instanceUrl, false)
-            } catch (_: Exception) {
-                null
-            }
+            val url =
+                try {
+                    Urls.parse(other.instanceUrl, false)
+                } catch (_: Exception) {
+                    null
+                }
 
             if (url == null) {
                 @Suppress("DialogTitleCapitalization")
-                throw ConfigurationException(MyBundle.message("hass.facet.editor.instanceUrl.invalid"))
+                throw ConfigurationException(
+                    MyBundle.message("hass.facet.editor.instanceUrl.invalid")
+                )
             }
 
             if (other.token.isBlank()) {

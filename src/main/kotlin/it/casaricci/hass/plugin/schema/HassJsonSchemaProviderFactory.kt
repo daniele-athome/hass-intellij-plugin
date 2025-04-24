@@ -15,10 +15,8 @@ import org.jetbrains.annotations.Nls
 private const val HASS_SCHEMA_PATH = "/schemas/configuration.json"
 
 class HassJsonSchemaProviderFactory : JsonSchemaProviderFactory, DumbAware {
-
-    override fun getProviders(project: Project): List<JsonSchemaFileProvider> {
-        return listOf(HassJsonSchemaProvider(project))
-    }
+    override fun getProviders(project: Project): List<JsonSchemaFileProvider> =
+        listOf(HassJsonSchemaProvider(project))
 
     private class HassJsonSchemaProvider(private val project: Project) : JsonSchemaFileProvider {
         override fun isAvailable(file: VirtualFile): Boolean = isHassConfigFile(file, project)

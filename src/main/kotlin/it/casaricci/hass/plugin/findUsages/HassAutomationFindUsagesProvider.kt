@@ -9,18 +9,11 @@ import it.casaricci.hass.plugin.language.HassAutomation
 import org.jetbrains.yaml.YAMLWordsScanner
 
 class HassAutomationFindUsagesProvider : FindUsagesProvider {
+    override fun getWordsScanner(): WordsScanner = YAMLWordsScanner()
 
-    override fun getWordsScanner(): WordsScanner {
-        return YAMLWordsScanner()
-    }
+    override fun canFindUsagesFor(element: PsiElement): Boolean = isMyElement(element)
 
-    override fun canFindUsagesFor(element: PsiElement): Boolean {
-        return isMyElement(element)
-    }
-
-    override fun getHelpId(element: PsiElement): String? {
-        return null
-    }
+    override fun getHelpId(element: PsiElement): String? = null
 
     override fun getType(element: PsiElement): String {
         if (isMyElement(element)) {
@@ -36,11 +29,8 @@ class HassAutomationFindUsagesProvider : FindUsagesProvider {
         return ""
     }
 
-    override fun getNodeText(element: PsiElement, useFullName: Boolean): String {
-        return getDescriptiveName(element)
-    }
+    override fun getNodeText(element: PsiElement, useFullName: Boolean): String =
+        getDescriptiveName(element)
 
-    private fun isMyElement(element: PsiElement): Boolean {
-        return element is HassAutomation
-    }
+    private fun isMyElement(element: PsiElement): Boolean = element is HassAutomation
 }

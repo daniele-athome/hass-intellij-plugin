@@ -40,8 +40,11 @@ dependencies {
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
-        create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"),
-            useInstaller = providers.gradleProperty("platformUseInstaller").map { it != "false" }.orElse(false))
+        create(
+            providers.gradleProperty("platformType"),
+            providers.gradleProperty("platformVersion"),
+            useInstaller = providers.gradleProperty("platformUseInstaller").map { it != "false" }.orElse(false),
+        )
 
         // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
@@ -62,30 +65,32 @@ intellijPlatform {
         version = providers.gradleProperty("pluginVersion")
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-        description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
-            val start = "<!-- Plugin description -->"
-            val end = "<!-- Plugin description end -->"
+        description =
+            providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
+                val start = "<!-- Plugin description -->"
+                val end = "<!-- Plugin description end -->"
 
-            with(it.lines()) {
-                if (!containsAll(listOf(start, end))) {
-                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                with(it.lines()) {
+                    if (!containsAll(listOf(start, end))) {
+                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                    }
+                    subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
                 }
-                subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
             }
-        }
 
         val changelog = project.changelog // local variable for configuration cache compatibility
         // Get the latest available change notes from the changelog file
-        changeNotes = providers.gradleProperty("pluginVersion").map { pluginVersion ->
-            with(changelog) {
-                renderItem(
-                    (getOrNull(pluginVersion) ?: getUnreleased())
-                        .withHeader(false)
-                        .withEmptySections(false),
-                    Changelog.OutputType.HTML,
-                )
+        changeNotes =
+            providers.gradleProperty("pluginVersion").map { pluginVersion ->
+                with(changelog) {
+                    renderItem(
+                        (getOrNull(pluginVersion) ?: getUnreleased())
+                            .withHeader(false)
+                            .withEmptySections(false),
+                        Changelog.OutputType.HTML,
+                    )
+                }
             }
-        }
 
         ideaVersion {
             sinceBuild = providers.gradleProperty("pluginSinceBuild")
@@ -97,8 +102,7 @@ intellijPlatform {
         if (providers.environmentVariable("CERTIFICATE_CHAIN_FILE").isPresent) {
             certificateChainFile.set(file(providers.environmentVariable("CERTIFICATE_CHAIN_FILE")))
             privateKeyFile.set(file(providers.environmentVariable("PRIVATE_KEY_FILE")))
-        }
-        else {
+        } else {
             certificateChain = providers.environmentVariable("CERTIFICATE_CHAIN")
             privateKey = providers.environmentVariable("PRIVATE_KEY")
         }
@@ -110,7 +114,8 @@ intellijPlatform {
         // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
+        channels =
+            providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
 
     pluginVerification {
@@ -143,12 +148,13 @@ tasks {
     }
 
     runIde {
-        jvmArgumentProviders += CommandLineArgumentProvider {
-            listOf(
-                // FIXME the HA states file can be very big - although this is not the way to go here...
-                "-Didea.max.intellisense.filesize=5242880"
-            )
-        }
+        jvmArgumentProviders +=
+            CommandLineArgumentProvider {
+                listOf(
+                    // FIXME the HA states file can be very big - although this is not the way to go here...
+                    "-Didea.max.intellisense.filesize=5242880",
+                )
+            }
     }
 
     val runPycharm by intellijPlatformTesting.runIde.registering {
@@ -160,15 +166,17 @@ tasks {
     }
 }
 
-val mdiIconsSpec: CopySpec = copySpec {
-    from("third-party/MaterialDesignIcons")
-    include("svg/*.svg", "meta.json")
-}
+val mdiIconsSpec: CopySpec =
+    copySpec {
+        from("third-party/MaterialDesignIcons")
+        include("svg/*.svg", "meta.json")
+    }
 
-val copyMdiIcons = tasks.register<Copy>("copyMdiIcons") {
-    into(layout.buildDirectory.dir("mdi-icons/icons/mdi"))
-    with(mdiIconsSpec)
-}
+val copyMdiIcons =
+    tasks.register<Copy>("copyMdiIcons") {
+        into(layout.buildDirectory.dir("mdi-icons/icons/mdi"))
+        with(mdiIconsSpec)
+    }
 
 sourceSets {
     java {
@@ -184,14 +192,15 @@ intellijPlatformTesting {
     runIde {
         register("runIdeForUiTests") {
             task {
-                jvmArgumentProviders += CommandLineArgumentProvider {
-                    listOf(
-                        "-Drobot-server.port=8082",
-                        "-Dide.mac.message.dialogs.as.sheets=false",
-                        "-Djb.privacy.policy.text=<!--999.999-->",
-                        "-Djb.consents.confirmation.enabled=false",
-                    )
-                }
+                jvmArgumentProviders +=
+                    CommandLineArgumentProvider {
+                        listOf(
+                            "-Drobot-server.port=8082",
+                            "-Dide.mac.message.dialogs.as.sheets=false",
+                            "-Djb.privacy.policy.text=<!--999.999-->",
+                            "-Djb.consents.confirmation.enabled=false",
+                        )
+                    }
             }
 
             plugins {
@@ -202,7 +211,7 @@ intellijPlatformTesting {
 }
 
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
-    format ("misc") {
+    format("misc") {
         target("*.yml", "*.yaml", "*.json", "*.properties")
         targetExclude("third-party/**")
 
@@ -210,7 +219,7 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
         leadingTabsToSpaces(2)
         endWithNewline()
     }
-    format ("xml") {
+    format("xml") {
         target("*.xml")
         targetExclude("third-party/**")
 

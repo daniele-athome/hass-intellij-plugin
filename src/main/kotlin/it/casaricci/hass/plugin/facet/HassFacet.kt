@@ -9,5 +9,5 @@ class HassFacet(
     module: Module,
     name: String,
     configuration: HassFacetConfiguration,
-    underlyingFacet: Facet<*>?
+    underlyingFacet: Facet<*>?,
 ) : Facet<HassFacetConfiguration>(facetType, module, name, configuration, underlyingFacet)

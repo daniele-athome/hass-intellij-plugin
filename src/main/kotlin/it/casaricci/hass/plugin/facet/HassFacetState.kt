@@ -1,16 +1,9 @@
 package it.casaricci.hass.plugin.facet
 
-/**
- * Home Assistant facet state.
- */
+/** Home Assistant facet state. */
 data class HassFacetState(
-    /**
-     * URL to the Home Assistant instance.
-     */
+    /** URL to the Home Assistant instance. */
     var instanceUrl: String = "",
-
-    /**
-     * Access token for authentication.
-     */
-    var token: String = ""
+    /** Access token for authentication. */
+    var token: String = "",
 )
