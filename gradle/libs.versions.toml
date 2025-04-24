@@ -10,6 +10,7 @@ kotlin = "1.9.25"
 kover = "0.8.3"
 qodana = "2024.2.3"
 compilerSerialization = "2.1.0"
+spotless = "7.0.3"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -22,3 +23,4 @@ kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 qodana = { id = "org.jetbrains.qodana", version.ref = "qodana" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "compilerSerialization" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

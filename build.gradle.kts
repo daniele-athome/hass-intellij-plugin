@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
+    alias(libs.plugins.spotless) // Spotless formatter Plugin
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -197,5 +198,35 @@ intellijPlatformTesting {
                 robotServerPlugin()
             }
         }
+    }
+}
+
+configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+    format ("misc") {
+        target("*.yml", "*.yaml", "*.json", "*.properties")
+        targetExclude("third-party/**")
+
+        trimTrailingWhitespace()
+        leadingTabsToSpaces(2)
+        endWithNewline()
+    }
+    format ("xml") {
+        target("*.xml")
+        targetExclude("third-party/**")
+
+        trimTrailingWhitespace()
+        leadingTabsToSpaces(4)
+        endWithNewline()
+    }
+    kotlin {
+        targetExclude("third-party/**")
+
+        ktfmt().kotlinlangStyle()
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        targetExclude("third-party/**")
+
+        ktlint()
     }
 }
