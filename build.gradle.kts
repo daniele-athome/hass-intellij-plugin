@@ -34,7 +34,10 @@ repositories {
 
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
 dependencies {
-    implementation(libs.kotlinSerialization)
+    implementation(libs.kotlinSerialization) {
+        // FIXME temporary hack because of version conflict between IDEA and kotlin-serialization-json
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
+    }
 
     testImplementation(libs.junit)
 
