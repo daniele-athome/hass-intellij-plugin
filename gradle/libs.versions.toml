@@ -5,10 +5,10 @@ kotlinSerialization = "1.8.0"
 
 # plugins
 changelog = "2.2.1"
-intelliJPlatform = "2.3.0"
-kotlin = "1.9.25"
-kover = "0.8.3"
-qodana = "2024.2.3"
+intelliJPlatform = "2.5.0"
+kotlin = "2.1.20"
+kover = "0.9.1"
+qodana = "2024.3.4"
 compilerSerialization = "2.1.0"
 spotless = "7.0.3"
 
