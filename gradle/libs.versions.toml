@@ -4,12 +4,12 @@ junit = "4.13.2"
 kotlinSerialization = "1.8.1"
 
 # plugins
-changelog = "2.2.1"
-intelliJPlatform = "2.6.0"
-kotlin = "2.2.0-RC"
+changelog = "2.4.0"
+intelliJPlatform = "2.7.0"
+kotlin = "2.2.0"
 kover = "0.9.1"
-qodana = "2024.3.4"
-compilerSerialization = "2.2.0-RC"
+qodana = "2025.1.1"
+compilerSerialization = "2.2.0"
 spotless = "7.0.3"
 
 [libraries]
