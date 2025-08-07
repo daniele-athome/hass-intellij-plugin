@@ -52,7 +52,6 @@ jobs:
           CHANGELOG: ${{ github.event.release.body }}
         run: |
           RELEASE_NOTE="./build/tmp/release_note.txt"
-          mkdir -p "$(dirname "$RELEASE_NOTE")"
           echo "$CHANGELOG" > $RELEASE_NOTE
 
           ${{ github.event.release.body }}
