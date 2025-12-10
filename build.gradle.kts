@@ -43,18 +43,19 @@ dependencies {
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
-        create(
-            providers.gradleProperty("platformType"),
-            providers.gradleProperty("platformVersion"),
-            useInstaller = providers.gradleProperty("platformUseInstaller").map { it != "false" }.orElse(false),
-        )
+        intellijIdea(providers.gradleProperty("platformVersion"),
+            configure = {
+                useInstaller = providers.gradleProperty("platformUseInstaller").map { it != "false" }.orElse(false)
+            })
 
         // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
-        bundledModules(providers.gradleProperty("platformBundledModules").map { it.split(',') })
 
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
+
+        // Module Dependencies. Uses `platformBundledModules` property from the gradle.properties file for bundled IntelliJ Platform modules.
+        bundledModules(providers.gradleProperty("platformBundledModules").map { it.split(',') })
 
         pluginVerifier()
         zipSigner()
@@ -161,7 +162,7 @@ tasks {
     }
 
     val runPycharm by intellijPlatformTesting.runIde.registering {
-        type = IntelliJPlatformType.PyCharmCommunity
+        type = IntelliJPlatformType.PyCharm
     }
 
     publishPlugin {
