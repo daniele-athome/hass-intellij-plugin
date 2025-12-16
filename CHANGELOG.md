@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.0.6] - 2025-12-16
+
 - Upgrade to latest configuration schema
 - IntelliJ platform compatibility up to 2025.3
 
@@ -16,6 +18,7 @@
 
 First public release!
 
-[Unreleased]: https://github.com/daniele-athome/hass-intellij-plugin/compare/v0.0.5...HEAD
+[Unreleased]: https://github.com/daniele-athome/hass-intellij-plugin/compare/v0.0.6...HEAD
+[0.0.6]: https://github.com/daniele-athome/hass-intellij-plugin/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/daniele-athome/hass-intellij-plugin/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/daniele-athome/hass-intellij-plugin/commits/v0.0.4
