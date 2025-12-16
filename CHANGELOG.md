@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+- Upgrade to latest configuration schema
+- IntelliJ platform compatibility up to 2025.3
+
 ## [0.0.5] - 2025-08-07
 
 - Upgrade to latest configuration schema
