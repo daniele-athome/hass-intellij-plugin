@@ -164,6 +164,11 @@ tasks {
             }
     }
 
+    val runOldIde by intellijPlatformTesting.runIde.registering {
+        type = IntelliJPlatformType.IntellijIdeaCommunity
+        version = "2024.3.6"
+    }
+
     val runPycharm by intellijPlatformTesting.runIde.registering {
         type = IntelliJPlatformType.PyCharm
     }
