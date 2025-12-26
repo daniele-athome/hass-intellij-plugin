@@ -5,24 +5,20 @@ import com.intellij.openapi.application.contextModality
 import com.intellij.openapi.progress.*
 import com.intellij.platform.util.progress.RawProgressReporter
 import com.intellij.platform.util.progress.internalCreateRawHandleFromContextStepIfExistsAndFresh
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.job
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.job
 
-/**
- * Compatibility function for [coroutineToIndicator].
- */
+/** Compatibility function for [coroutineToIndicator]. */
 @Deprecated("Move to coroutine progress reporting")
 suspend fun <T> coroutineToIndicatorCompat(action: (ProgressIndicator?) -> T): T {
     return try {
         coroutineToIndicator(action)
     } catch (e: NoSuchMethodError) {
         val ctx = coroutineContext
-        contextToIndicator(ctx) {
-            action(ProgressManager.getGlobalProgressIndicator())
-        }
+        contextToIndicator(ctx) { action(ProgressManager.getGlobalProgressIndicator()) }
     }
 }
 
