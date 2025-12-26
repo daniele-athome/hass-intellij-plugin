@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+- Fix compatibility with platform 2024.x
+
 ## [0.0.6] - 2025-12-16
 
 - Upgrade to latest configuration schema

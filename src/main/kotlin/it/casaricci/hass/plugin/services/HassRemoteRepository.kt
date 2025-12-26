@@ -13,7 +13,6 @@ import com.intellij.openapi.module.ModulePointerManager
 import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressIndicatorProvider
-import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtil
@@ -30,6 +29,7 @@ import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.createDirectories
 import it.casaricci.hass.plugin.MyBundle
 import it.casaricci.hass.plugin.ProgressIndicatorInputStream
+import it.casaricci.hass.plugin.coroutineToIndicatorCompat
 import it.casaricci.hass.plugin.getConfiguration
 import it.casaricci.hass.plugin.services.HassRemoteRepository.Companion.getServicesCacheFile
 import it.casaricci.hass.plugin.splitEntityId
@@ -391,7 +391,7 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
                     MyBundle.message("hass.notification.refreshCache.progress"),
                     cancellable = true,
                 ) {
-                    coroutineToIndicator {
+                    coroutineToIndicatorCompat {
                         try {
                             downloadAndFormatJson(url, config.token, cachedResponseFile) {
                                 data,
@@ -442,7 +442,7 @@ open class HassRemoteRepository(private val project: Project, private val cs: Co
                     MyBundle.message("hass.notification.refreshCache.progress"),
                     cancellable = true,
                 ) {
-                    coroutineToIndicator {
+                    coroutineToIndicatorCompat {
                         try {
                             downloadAndFormatJson(url, config.token, cachedResponseFile) {
                                 data,
