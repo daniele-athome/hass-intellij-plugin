@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 - Fix compatibility with platform 2024.x
+- IntelliJ platform compatibility up to 2025.6
 
 ## [0.0.6] - 2025-12-16
 
