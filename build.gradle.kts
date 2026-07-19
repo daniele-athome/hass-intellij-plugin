@@ -176,6 +176,8 @@ tasks {
 
     val runPycharm by intellijPlatformTesting.runIde.registering {
         type = IntelliJPlatformType.PyCharm
+        // 2026.2 is not available yet
+        version = "2026.1.4"
     }
 
     publishPlugin {
