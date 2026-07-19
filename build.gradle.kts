@@ -131,7 +131,10 @@ intellijPlatform {
             create { version = "2026.1.4" }
             create { version = "2025.3.4" }
             create { version = "2025.3.1" }
-            create { version = "2025.2" }
+            create {
+                version = "2025.2"
+                type = IntelliJPlatformType.IntellijIdeaCommunity
+            }
         }
     }
 }
