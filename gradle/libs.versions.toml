@@ -1,15 +1,15 @@
 [versions]
 # libraries
 junit = "4.13.2"
-kotlinSerialization = "1.8.1"
+kotlinSerialization = "1.11.0"
 
 # plugins
 changelog = "2.5.0"
 intelliJPlatform = "2.18.1"
-kotlin = "2.2.21"
+kotlin = "2.4.10"
 kover = "0.9.3"
 qodana = "2025.2.2"
-compilerSerialization = "2.2.0"
+compilerSerialization = "2.4.10"
 spotless = "7.0.3"
 
 [libraries]
