@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+- Drop support for IntelliJ platform earlier than 2025.2
+- IntelliJ platform compatibility up to 2026.2
+
 ## [0.0.8] - 2026-03-29
 
 - Fix compatibility with platform 2024.x
