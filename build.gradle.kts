@@ -127,7 +127,11 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            recommended()
+            create { version = "2026.2" }
+            create { version = "2026.1.4" }
+            create { version = "2025.3.4" }
+            create { version = "2025.3.1" }
+            create { version = "2025.2" }
         }
     }
 }
@@ -164,9 +168,10 @@ tasks {
             }
     }
 
+    // run the oldest supported IDE version
     val runOldIde by intellijPlatformTesting.runIde.registering {
         type = IntelliJPlatformType.IntellijIdeaCommunity
-        version = "2024.3.6"
+        version = "2025.2"
     }
 
     val runPycharm by intellijPlatformTesting.runIde.registering {
