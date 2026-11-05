@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [0.0.10] - 2026-11-05
+
+- IntelliJ platform compatibility up to 2026.3
+
 ## [0.0.9] - 2026-07-19
 
 - Drop support for IntelliJ platform earlier than 2025.2
@@ -28,7 +32,8 @@
 
 First public release!
 
-[Unreleased]: https://github.com/daniele-athome/hass-intellij-plugin/compare/v0.0.9...HEAD
+[Unreleased]: https://github.com/daniele-athome/hass-intellij-plugin/compare/v0.0.10...HEAD
+[0.0.10]: https://github.com/daniele-athome/hass-intellij-plugin/compare/v0.0.9...v0.0.10
 [0.0.9]: https://github.com/daniele-athome/hass-intellij-plugin/compare/v0.0.8...v0.0.9
 [0.0.8]: https://github.com/daniele-athome/hass-intellij-plugin/compare/v0.0.6...v0.0.8
 [0.0.6]: https://github.com/daniele-athome/hass-intellij-plugin/compare/v0.0.5...v0.0.6
